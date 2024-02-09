@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+
+<div class="grid-container">
+    <div class="clickable-area forward" id="forwardArea">Vorwärts</div>
+    <div class="clickable-area backward" id="backwardArea">Rückwärts</div>
+    <div class="clickable-area left" id="leftArea">Links</div>
+    <div class="clickable-area right" id="rightArea">Rechts</div>
+</div>
+
+
+</body>
+</html> 
+
+<style>
+    /* Stilisierung ist optional */
+    /*
+    .clickable-area {
+        width: 100px;
+        height: 100px;
+        display: inline-block;
+        margin: 10px;
+        cursor: pointer;
+        text-align: center;
+        line-height: 100px;
+        font-size: 16px;
+    }
+    */
+
+
+    .right, .left{
+        background-color: orange;
+    }
+    .forward, .backward{
+        background-color: rgb(86, 198, 236);
+    }
+
+    .right{
+        grid-area: r;
+    }
+    .left{
+        grid-area: l;
+    }
+    .forward{
+        grid-area: f;
+    }
+    .backward{
+        grid-area: b;
+    }
+
+    .grid-container {
+            display: grid;
+
+
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+
+            grid-template-areas:
+            '. f .'
+            'l b r'
+            '. . .';
+            
+
+            grid-gap: 1px;
+            height: 100vh;
+        }
+</style>
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Elemente abrufen
+        const leftArea = document.querySelector('.left');
+        const rightArea = document.querySelector('.right');
+        const forwardArea = document.querySelector('.forward');
+        const backwardArea = document.querySelector('.backward');
+        const command = null;
+
+
+        
+          // Funktion, die bei 'mouseover' ausgelöst wird
+          function handleMouseOver() {
+                console.log('Mouse Over!');
+
+                const command = { command: 'moveForward', speed: 'medium' }; 
+
+                    fetch('http://10.10.0.172:3000/movement', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(command),
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log('Antwort vom Server:', data);
+                    })
+                    .catch((error) => {
+                        console.error('Fehler beim Senden des Befehls:', error);
+                    });
+            }
+            
+            // Funktion, die bei 'mouseout' ausgelöst wird
+            function handleMouseOut() {
+                console.log('Mouse Out!');
+                // Füge hier den Code hinzu, der bei jedem 'mouseout' ausgeführt werden soll
+
+
+                
+            }
+
+            // 'mouseover'-Event-Listener für jeden Bereich
+            leftArea.addEventListener('mouseover', () => {
+                console.log("test");
+                handleMouseOver();
+            });
+
+
+            rightArea.addEventListener('mouseover', () => {
+                handleMouseOver();
+            });
+
+            forwardArea.addEventListener('mouseover', () => {
+                handleMouseOver();
+            });
+
+            backwardArea.addEventListener('mouseover', () => {
+                handleMouseOver();
+            });
+
+            // 'mouseout'-Event-Listener für jeden Bereich
+            leftArea.addEventListener('mouseout', () => {
+                handleMouseOut();
+            });
+
+            rightArea.addEventListener('mouseout', () => {
+                handleMouseOut();
+            });
+
+            forwardArea.addEventListener('mouseout', () => {
+                handleMouseOut();
+            });
+
+            backwardArea.addEventListener('mouseout', () => {
+                handleMouseOut();
+            });
+
+            
+    });
+</script>
