@@ -1,42 +1,21 @@
-require('dotenv').config();
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const https = require('https');
 const fs = require('fs');
-/*
-const tls = require('tls');
-
-const options = {
-    host: '192.168.0.22', // Hier die IP-Adresse oder der Hostname des Servers angeben
-    port: 3000, // Hier den Port des HTTPS-Servers angeben
-    rejectUnauthorized: false // Hier angeben, ob nicht signierte Zertifikate abgelehnt werden sollen
-};
-
-const socket = tls.connect(options, () => {
-    console.log('Client verbunden');
-    console.log('Peer-Zertifikat: ', socket.getPeerCertificate());
-});
-
-socket.on('error', (error) => {
-    console.error('Fehler bei SSL-Verbindung:', error);
-});
-*/
 
 const port = 3000;
 const ip = '192.168.0.22';
 const fixPassword = process.env.PASSWORD_HASH;
 
 const options = {
-    key: fs.readFileSync(__dirname + '/key.pem'),
-    cert: fs.readFileSync(__dirname + '/cert.pem'),
-    rejectUnauthorized: false
+    key: fs.readFileSync('privkey.pem'),
+    cert: fs.readFileSync('cert.pem'),
+    passphrase: 'phrase'
 };
 
 const app = express();
-
 const server = https.createServer(options, app);
 
 app.use(session({
@@ -79,8 +58,6 @@ function checkPassword(req, res, next) {
     if (!enteredPassword) {
         return res.status(400).send('Passwort fehlt');
     }
-    
-
     bcrypt.compare(enteredPassword, fixPassword, (err, result) => {
         if (err || !result) {
             return res.status(401).send('Ungültiges Passwort!');
@@ -93,7 +70,7 @@ function checkPassword(req, res, next) {
 
 app.post('/login', checkPassword);
 
-/*
+
 server.on('error', (error) => {
     console.error('Fehler beim Starten des HTTPS-Servers:', error);
 });
@@ -101,7 +78,7 @@ server.on('clientError', (error, socket) => {
     console.error('Fehler bei eingehender HTTPS-Verbindung:', error);
     socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
 });
-*/
+
 
 server.listen(port, ip, () => {
     console.log(`Server läuft auf https://${ip}:${port}/movement`);
