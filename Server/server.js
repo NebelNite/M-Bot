@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const https = require('https');
 const fs = require('fs');
+
 /*
 const tls = require('tls');
 
@@ -25,8 +26,9 @@ socket.on('error', (error) => {
 });
 */
 
-const port = 3000;
-const ip = '192.168.0.22';
+const port = 3001;
+//const ip = '192.168.0.22';
+const ip = '0.0.0.0';
 const fixPassword = process.env.PASSWORD_HASH;
 
 const options = {
@@ -54,11 +56,15 @@ app.get('/movement', requireLogin, (req, res) => {
 
 app.post('/movement', (req, res) => {
     if (req.session && req.session.loggedIn) {
-        const command = req.body.command;
+        const command = req.body.direction; 
         console.log('Empfangener Befehl:', command);
-        res.send('Command: ' + command);
+        
+        // Hier kannst du die empfangenen Befehle verarbeiten, z.B. an deine Robotersteuerung weiterleiten
+
+        res.json({ direction: command});
+
     } else {
-        res.redirect("/login");
+        res.redirect("/login"); 
     }
 });
 
@@ -103,7 +109,9 @@ server.on('clientError', (error, socket) => {
 });
 */
 
+
 server.listen(port, ip, () => {
-    console.log(`Server läuft auf https://${ip}:${port}/movement`);
+    
+    console.log(`Server läuft auf https://${"10.10.0.172"}:${port}/movement`);
 });
 

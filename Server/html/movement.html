@@ -48,7 +48,7 @@
     .left {
         background-color: orange;
     }
-
+    
     .forward,
     .backward {
         background-color: rgb(86, 198, 236);
@@ -147,13 +147,17 @@
         speedSelector.style.display = 'none';
     });
 
-    function handleMouseOver() {
+    function handleMouseOver(direction) {
+
         console.log('Mouse Over!');
+
+        //Fetch-Anfrage 
         const command = {
-            command: 'moveForward',
-            speed: 'medium'
+            direction: direction
         };
-        // Hier deine Fetch-Anfrage einfügen
+
+        sendMovement(command);
+
     }
 
     function handleMouseOut() {
@@ -161,18 +165,22 @@
         // Hier den Code für 'mouseout' einfügen
     }
 
+
+
+
     leftArea.addEventListener('mouseover', () => {
-        handleMouseOver();
+        handleMouseOver(3);
     });
     rightArea.addEventListener('mouseover', () => {
-        handleMouseOver();
+        handleMouseOver(1);
     });
     forwardArea.addEventListener('mouseover', () => {
-        handleMouseOver();
+        handleMouseOver(0);
     });
     backwardArea.addEventListener('mouseover', () => {
-        handleMouseOver();
+        handleMouseOver(2);
     });
+
 
     leftArea.addEventListener('mouseout', () => {
         handleMouseOut();
@@ -186,5 +194,69 @@
     backwardArea.addEventListener('mouseout', () => {
         handleMouseOut();
     });
+
+
+
+
+    
+    function sendMovement(command) {
+
+        fetch('/movement', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(command)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Server response:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+
+    confirmSpeedBtn.addEventListener('click', function () {
+        const selectedSpeed = speedSelect.value;
+        console.log('Selected Speed:', selectedSpeed);
+        speedSelector.style.display = 'none';
+
+        sendSpeed(selectedSpeed);
+});
+
+    function sendSpeed(speed) {
+
+        const command = {
+            speed: speed
+        };
+
+        fetch('/speed', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(command)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Server response:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
 });
 </script>
