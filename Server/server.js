@@ -6,25 +6,8 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const https = require('https');
 const fs = require('fs');
+const dgram = require('dgram');
 
-/*
-const tls = require('tls');
-
-const options = {
-    host: '192.168.0.22', // Hier die IP-Adresse oder der Hostname des Servers angeben
-    port: 3000, // Hier den Port des HTTPS-Servers angeben
-    rejectUnauthorized: false // Hier angeben, ob nicht signierte Zertifikate abgelehnt werden sollen
-};
-
-const socket = tls.connect(options, () => {
-    console.log('Client verbunden');
-    console.log('Peer-Zertifikat: ', socket.getPeerCertificate());
-});
-
-socket.on('error', (error) => {
-    console.error('Fehler bei SSL-Verbindung:', error);
-});
-*/
 
 const port = 3001;
 //const ip = '192.168.0.22';
@@ -70,10 +53,25 @@ app.post('/movement', (req, res) => {
 
 function requireLogin(req, res, next) {
     if (req.session && req.session.loggedIn) {
+        sendBroadcast();
         return next();
     } else {
         res.redirect("/login");
     }
+}
+
+const broadcastMessage = 'MBot2 Discovery';
+const broadcastPort = 1234;
+const client = dgram.createSocket('udp4');
+
+function sendBroadcast() {
+    client.send(broadcastMessage, broadcastPort, '255.255.255.255', (error) => {
+        if (error) {
+            console.error('Fehler beim Senden des Broadcasts:', error);
+        } else {
+            console.log('Broadcast gesendet');
+        }
+    });
 }
 
 app.get('/login', (req, res) => {
