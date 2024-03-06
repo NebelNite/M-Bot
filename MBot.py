@@ -34,7 +34,6 @@ cyberpi.led.on(0, 0, 255)
 cyberpi.console.println("Connection established")
 
 # Broadcast-Test
-
 udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 udp.bind(('', 1234))
@@ -62,6 +61,7 @@ while True:
     time.sleep(0.1)
 
 udp.close()
+#
 
 # Get the IP address, subnet mask, and gateway
 subnet = cyberpi.network.get_subnet_mark()

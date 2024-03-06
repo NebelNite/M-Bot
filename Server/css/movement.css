@@ -1,0 +1,77 @@
+.right,
+.left {
+    background-color: orange;
+}
+
+.forward,
+.backward {
+    background-color: rgb(86, 198, 236);
+}
+
+.right {
+    grid-area: r;
+}
+
+.left {
+    grid-area: l;
+
+}
+
+
+.forward {
+    grid-area: f;
+}
+
+.backward {
+    grid-area: b;
+}
+
+div{
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-areas: '. f .' 
+                         'l b r'
+                         '. . .';
+    grid-gap: 10px;
+    height: 100vh;
+}
+
+.settings-icon {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    
+}
+.settings-icon:hover{
+    transform: rotate(45deg);
+}
+
+.speed-selector {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.speed-selector label,
+.speed-selector button {
+    display: block;
+    margin: 10px auto; 
+    width: 80%; 
+    height: 70px; 
+    font-size: 20px;
+}

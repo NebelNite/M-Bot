@@ -11,7 +11,7 @@ const dgram = require('dgram');
 
 const port = 3001;
 //const ip = '192.168.0.22';
-const ip = '0.0.0.0';
+const ip = '10.10.0.172';
 const fixPassword = process.env.PASSWORD_HASH;
 
 const options = {
@@ -33,6 +33,21 @@ app.use(session({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
+app.use(express.static('public'));
+
+app.get('*/css/.css', function (req, res, next) {
+    res.set('Content-Type', 'text/css');
+    next();
+});
+
+app.get('*js/.js', function (req, res, next) {
+    res.set('Content-Type', 'application/javascript');
+    next();
+});
+
+
+
 app.get('/movement', requireLogin, (req, res) => {
     res.sendFile(__dirname + "/html/movement.html");
 });
@@ -42,7 +57,6 @@ app.post('/movement', (req, res) => {
         const command = req.body.direction; 
         console.log('Empfangener Befehl:', command);
         
-        // Hier kannst du die empfangenen Befehle verarbeiten, z.B. an deine Robotersteuerung weiterleiten
 
         res.json({ direction: command});
 
@@ -53,17 +67,121 @@ app.post('/movement', (req, res) => {
 
 function requireLogin(req, res, next) {
     if (req.session && req.session.loggedIn) {
-        sendBroadcast();
+
+        // Aufruf der Funktion zum Durchführen des Netzwerkscans für mehrere Subnetze
+        
+        const subnetsToScan = ['10.10']; // Subnetze
+        scanNetwork(subnetsToScan);
+        
+
+        //sendBroadcast();
+
         return next();
     } else {
         res.redirect("/login");
     }
 }
 
-const broadcastMessage = 'MBot2 Discovery';
+
 const broadcastPort = 1234;
 const client = dgram.createSocket('udp4');
 
+const ping = require('ping');
+
+function scanNetwork(subnets) {
+    const promises = [];
+
+    subnets.forEach(subnet => {
+        for (let i = 1; i <= 254; i++) {
+            const host = `${subnet}.${i}`;
+            const promise = ping.promise.probe(host);
+            promises.push(promise);
+        }
+    });
+
+    Promise.all(promises)
+        .then(results => {
+            const reachableDevices = results.filter(result => result.alive).map(result => result.host);
+            console.log('Erreichbare Geräte im Netzwerk:', reachableDevices);
+
+            sendMessageToDevices(reachableDevices,"MBotDiscovery");
+
+        })
+        .catch(error => {
+            console.error('Fehler beim Netzwerkscan:', error);
+        });
+}
+
+
+function sendMessageToDevices(devices, message) {
+    const client = dgram.createSocket('udp4');
+
+
+    let promises = [];
+
+    devices.forEach(device => {
+        const promise = new Promise((resolve, reject) => {
+            client.send(message, 0, message.length, 12345, device, (error) => {
+                if (error) {
+                    console.error(`Fehler beim Senden der Nachricht an ${device}:`, error);
+                    reject(error);
+                } else {
+                    console.log(`Nachricht erfolgreich an ${device} gesendet: ${message}`);
+                    resolve();
+                }
+            });
+        });
+
+        promises.push(promise);
+    });
+
+
+    Promise.all(promises)
+        .then(() => {
+
+            listenForUdpMessages();
+
+            client.close();
+        })
+        .catch(error => {
+            console.error('Fehler beim Senden der Nachrichten:', error);
+            client.close();
+        });
+
+
+}
+
+
+
+function listenForUdpMessages() {
+
+    // Create a UDP server
+    const server = dgram.createSocket('udp4');
+  
+    // Bind the server to a port and IP address
+    server.bind(12345, '0.0.0.0');
+    
+    // Handle incoming messages
+    server.on('message', (message, remote) => {
+
+      if (message.toString() === 'MBotDiscovered') {
+        console.log('Received message:', message);
+        console.log('From address:', remote);
+  
+        // Send a response message
+        const responseMessage = 'MBotDiscovered';
+        server.send(responseMessage, remote.port, remote.address);
+      }
+    });
+  
+    // Close the server when the function is no longer needed
+    return () => {
+      server.close();
+    };
+  }
+
+
+/*
 function sendBroadcast() {
     client.send(broadcastMessage, broadcastPort, '255.255.255.255', (error) => {
         if (error) {
@@ -72,7 +190,7 @@ function sendBroadcast() {
             console.log('Broadcast gesendet');
         }
     });
-}
+}*/
 
 app.get('/login', (req, res) => {
     res.sendFile(__dirname + "/html/login.html");
@@ -97,15 +215,6 @@ function checkPassword(req, res, next) {
 
 app.post('/login', checkPassword);
 
-/*
-server.on('error', (error) => {
-    console.error('Fehler beim Starten des HTTPS-Servers:', error);
-});
-server.on('clientError', (error, socket) => {
-    console.error('Fehler bei eingehender HTTPS-Verbindung:', error);
-    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-});
-*/
 
 
 server.listen(port, ip, () => {
