@@ -6,6 +6,8 @@ import usocket
 import machine
 import ussl as ssl
 
+
+
 # Blue
 cyberpi.led.on(0, 0, 255)
 
@@ -23,45 +25,45 @@ while True:
         sockaddr = cyberpi.network.get_ip()
         cyberpi.console.println("IP:")
         cyberpi.console.println(sockaddr)
-        cyberpi.display.clear()
+        
+        
+        """cyberpi.display.clear()"""
         break
-
-
+    
+"""
 cyberpi.console.println("Connection established")
+"""
 
 subnet = cyberpi.network.get_subnet_mark()
 gateway = cyberpi.network.get_gateway()
 sockaddr = cyberpi.network.get_ip()
 
 
+port=12345
 
+# UDP-Socket erstellen
+udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+udp_socket.bind(('', port))  # Binden an alle verfügbaren Schnittstellen
 
+cyberpi.console.println('Listening (UDP)')
 
-# Broadcast
-udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-udp.bind(('', 1234))
-udp.setblocking(False)
 
 while True:
-    try:
-        data, addr = udp.recvfrom(1024)
-        if data == b'MBot2 Discovery':
-            print('Broadcast request received and answered')
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_NONE)
-            s.connect((addr, 3500))
+    data, addr = udp_socket.recvfrom(1024)  # Nachricht empfangen
+    
+    cyberpi.console.println('Nachricht erhalten: {} : {}' .format(addr, data))
+    
+    # Hier kannst du auf die Nachricht reagieren und eine Antwort senden
+    if data.decode() == "MBotDiscovery":
+        response_message = "MBotDiscovered"
+        # addr[0] = Server IP
+        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+        cyberpi.console.println('Serverip: {} ' .format(addr[0]))
+    elif data.decode() == "Connected to Server":
+        cyberpi.console.println('Connected to server!')
+        break
 
-            s.send(b'D3')
-            time.sleep(1)
-            data = s.recv(1024)
-            s.close()
-            break
-    except OSError:
-        pass
+cyberpi.mbot2.drive_power(100,100)
+time.sleep(2)
 
-    print("Waiting for broadcast request...")
-    time.sleep(0.1)
-
-udp.close()
-#
+        

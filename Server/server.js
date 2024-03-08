@@ -57,7 +57,6 @@ app.post('/movement', (req, res) => {
         const command = req.body.direction; 
         console.log('Empfangener Befehl:', command);
         
-
         res.json({ direction: command});
 
     } else {
@@ -72,7 +71,8 @@ function requireLogin(req, res, next) {
         
         const subnetsToScan = ['10.10']; // Subnetze
         scanNetwork(subnetsToScan);
-        
+
+        listenForUdpMessages();
 
         //sendBroadcast();
 
@@ -92,7 +92,7 @@ function scanNetwork(subnets) {
     const promises = [];
 
     subnets.forEach(subnet => {
-        for (let i = 1; i <= 254; i++) {
+        for (let i = 1; i <= 255; i++) {
             const host = `${subnet}.${i}`;
             const promise = ping.promise.probe(host);
             promises.push(promise);
@@ -116,7 +116,6 @@ function scanNetwork(subnets) {
 function sendMessageToDevices(devices, message) {
     const client = dgram.createSocket('udp4');
 
-
     let promises = [];
 
     devices.forEach(device => {
@@ -139,8 +138,6 @@ function sendMessageToDevices(devices, message) {
     Promise.all(promises)
         .then(() => {
 
-            listenForUdpMessages();
-
             client.close();
         })
         .catch(error => {
@@ -151,26 +148,32 @@ function sendMessageToDevices(devices, message) {
 
 }
 
-
+let mBotIp;
 
 function listenForUdpMessages() {
 
     // Create a UDP server
     const server = dgram.createSocket('udp4');
-  
+
     // Bind the server to a port and IP address
     server.bind(12345, '0.0.0.0');
     
+    console.log("Listening");
+
     // Handle incoming messages
     server.on('message', (message, remote) => {
+
+        console.log(message.toString());
 
       if (message.toString() === 'MBotDiscovered') {
         console.log('Received message:', message);
         console.log('From address:', remote);
-  
+        mBotIp = remote;
+
         // Send a response message
-        const responseMessage = 'MBotDiscovered';
+        const responseMessage = 'Connected to Server';
         server.send(responseMessage, remote.port, remote.address);
+
       }
     });
   
@@ -181,16 +184,7 @@ function listenForUdpMessages() {
   }
 
 
-/*
-function sendBroadcast() {
-    client.send(broadcastMessage, broadcastPort, '255.255.255.255', (error) => {
-        if (error) {
-            console.error('Fehler beim Senden des Broadcasts:', error);
-        } else {
-            console.log('Broadcast gesendet');
-        }
-    });
-}*/
+
 
 app.get('/login', (req, res) => {
     res.sendFile(__dirname + "/html/login.html");
