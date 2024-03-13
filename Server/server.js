@@ -64,6 +64,46 @@ app.post('/movement', (req, res) => {
     }
 });
 
+
+app.post('/sendMovement', (req, res) => {
+
+    command = req.body;
+
+    console.log('Movement sent');
+
+    sendDirectionToMBot(command, command.direction);
+    
+});
+
+
+
+
+function sendDirectionToMBot(message, text) {
+
+
+    if(mBotIp != undefined && mBotPort != undefined)
+    {
+        const client = dgram.createSocket('udp4');
+        const direction = message.direction.toString(); // Stelle sicher, dass die Richtung als Zeichenfolge formatiert ist
+        const buffer = Buffer.from(direction); // Konvertiere die Richtung in einen Puffer
+
+
+        client.send(buffer, 0, buffer.length, mBotIp.port, mBotIp.address, (error) => {
+            if (error) {
+                console.error(`Fehler beim Senden der Nachricht an ${mBotIp}:${mBotPort}:`, error);
+            } else {
+                console.log(`Nachricht erfolgreich an ${mBotIp.address}:${mBotPort.port} gesendet: ${direction}`);
+            }
+            client.close();
+        });
+    }
+
+}
+
+
+
+
+
 function requireLogin(req, res, next) {
     if (req.session && req.session.loggedIn) {
 
@@ -73,8 +113,6 @@ function requireLogin(req, res, next) {
         scanNetwork(subnetsToScan);
 
         listenForUdpMessages();
-
-        //sendBroadcast();
 
         return next();
     } else {
@@ -120,7 +158,7 @@ function sendMessageToDevices(devices, message) {
 
     devices.forEach(device => {
         const promise = new Promise((resolve, reject) => {
-            client.send(message, 0, message.length, 12345, device, (error) => {
+            client.send(message, 0, message.length, mBotPort, device, (error) => {
                 if (error) {
                     console.error(`Fehler beim Senden der Nachricht an ${device}:`, error);
                     reject(error);
@@ -148,7 +186,8 @@ function sendMessageToDevices(devices, message) {
 
 }
 
-let mBotIp;
+let mBotIp, mBotPort = 12345;
+
 
 function listenForUdpMessages() {
 
@@ -156,7 +195,7 @@ function listenForUdpMessages() {
     const server = dgram.createSocket('udp4');
 
     // Bind the server to a port and IP address
-    server.bind(12345, '0.0.0.0');
+    server.bind(mBotPort, '0.0.0.0');
     
     console.log("Listening");
 
@@ -182,7 +221,6 @@ function listenForUdpMessages() {
       server.close();
     };
   }
-
 
 
 

@@ -62,7 +62,7 @@ while True:
     elif data.decode() == "Connected to Server":
         cyberpi.console.println('Connected to server!')
         break
-
+        
 cyberpi.mbot2.drive_power(100,100)
 time.sleep(2)
 
