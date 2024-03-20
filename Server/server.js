@@ -8,13 +8,47 @@ const https = require('https');
 const fs = require('fs');
 const dgram = require('dgram');
 const ping = require('ping');
-
-
+const os = require('os');
 
 
 const port = 3001;
-//const ip = '192.168.0.22';
-const ip = '10.10.0.172';
+
+
+
+let ipv4Addresses = [];
+
+const networkInterfaces = os.networkInterfaces();
+
+for (const [name, interfaces] of Object.entries(networkInterfaces)) {
+  for (const interfaceDetails of interfaces) {
+    if (interfaceDetails.family === 'IPv4') {
+      ipv4Addresses.push(interfaceDetails);
+    }
+  }
+}
+
+if (ipv4Addresses.length === 0) {
+  console.error('Keine IPv4-Adresse vorhanden.');
+  process.exit(1);
+}
+
+
+const ip = ipv4Addresses[0].address;
+const SUBNET_MASK = "255.255.255.0";
+
+const ipv4AddressParts = ip.split(".").map(Number);
+const subnetMaskParts = SUBNET_MASK.split(".").map(Number);
+
+// Berechnung der Broadcast-Adresse
+const broadcastAddressParts = ipv4AddressParts.map((part, i) => {
+  return part | (255 - subnetMaskParts[i]);
+});
+
+// Ergebnis ausgeben
+let broadcastip = broadcastAddressParts.join(".");
+
+
+//const ip = '10.10.0.172';
 const fixPassword = process.env.PASSWORD_HASH;
 
 const options = {
@@ -24,6 +58,8 @@ const options = {
 };
 
 const app = express();
+
+const client = dgram.createSocket('udp4');
 
 const server = https.createServer(options, app);
 
@@ -136,9 +172,12 @@ function requireLogin(req, res, next) {
 
         // Aufruf der Funktion zum Durchführen des Netzwerkscans für mehrere Subnetze
         
-        const subnetsToScan = ['10.10']; // Subnetze
+        const subnetsToScan = ['10.10'];
         
         scanNetwork(subnetsToScan);
+
+        //sendBroadcastMessage("MBotDiscovery");
+
 
         listenForUdpMessages();
 
@@ -149,8 +188,25 @@ function requireLogin(req, res, next) {
 }
 
 
-const broadcastPort = 1234;
-const client = dgram.createSocket('udp4');
+
+function sendBroadcastMessage(message) {
+    const client = dgram.createSocket('udp4');
+
+    // Set the broadcast option to true
+    client.setBroadcast(true);
+
+    // Send the message to the broadcast address
+    client.send(message, 0, message.length, mBotPort, '255.255.255.255', (error) => {
+        if (error) {
+            console.error(`Fehler beim Senden der Broadcast-Nachricht:`, error);
+        } else {
+            console.log(`Broadcast-Nachricht erfolgreich gesendet: ${message}`);
+        }
+
+        // Close the client after sending the message
+        client.close();
+    });
+}
 
 
 function scanNetwork(subnets) {
@@ -179,6 +235,7 @@ function scanNetwork(subnets) {
 
 
 function sendMessageToDevices(devices, message) {
+
     const client = dgram.createSocket('udp4');
 
     let promises = [];
@@ -209,11 +266,12 @@ function sendMessageToDevices(devices, message) {
             console.error('Fehler beim Senden der Nachrichten:', error);
             client.close();
         });
-
-
 }
 
+
 let mBotIp, mBotPort = 12345;
+
+
 
 
 function listenForUdpMessages() {
@@ -278,6 +336,6 @@ app.post('/login', checkPassword);
 
 server.listen(port, ip, () => {
     
-    console.log(`Server läuft auf https://${"10.10.0.172"}:${port}/movement`);
+    console.log(`Server läuft auf https://${ip}:${port}/movement`);
 });
 
