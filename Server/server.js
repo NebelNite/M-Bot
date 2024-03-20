@@ -9,9 +9,16 @@ const fs = require('fs');
 const dgram = require('dgram');
 const ping = require('ping');
 const os = require('os');
+const socketIo = require('socket.io');
+
+const udpBroadcast = require('udp-broadcast');
+
+
 
 
 const port = 3001;
+
+const client = dgram.createSocket('udp4');
 
 
 
@@ -51,17 +58,15 @@ let broadcastip = broadcastAddressParts.join(".");
 //const ip = '10.10.0.172';
 const fixPassword = process.env.PASSWORD_HASH;
 
+
 const options = {
     key: fs.readFileSync(__dirname + '/key.pem'),
     cert: fs.readFileSync(__dirname + '/cert.pem'),
     rejectUnauthorized: false
 };
 
+
 const app = express();
-
-const client = dgram.createSocket('udp4');
-
-const server = https.createServer(options, app);
 
 app.use(session({
     secret: 'mysecret',
@@ -71,9 +76,13 @@ app.use(session({
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-
 app.use(express.static('public'));
+
+
+const server = https.createServer(options, app);
+
+const io = socketIo(server);
+
 
 app.get('*/css/.css', function (req, res, next) {
     res.set('Content-Type', 'text/css');
@@ -173,7 +182,7 @@ function requireLogin(req, res, next) {
         // Aufruf der Funktion zum Durchführen des Netzwerkscans für mehrere Subnetze
         
         const subnetsToScan = ['10.10'];
-        
+
         scanNetwork(subnetsToScan);
 
         //sendBroadcastMessage("MBotDiscovery");
@@ -189,7 +198,35 @@ function requireLogin(req, res, next) {
 
 
 
+
 function sendBroadcastMessage(message) {
+
+/*
+    // Set the broadcast options
+    const broadcastOptions = {
+      host: '255.255.255.255',
+      port: 1234,
+      multicast: false
+    };
+    
+    // Set the message to send
+    //message = Buffer.from('hello world');
+
+    
+
+    // Create a UDP socket and send the broadcast message
+    udpBroadcast.send(broadcastOptions, message, (error) => {
+      if (error) {
+        console.error('Error sending broadcast message:', error);
+      } else {
+        console.log('Broadcast message sent successfully!');
+      }
+    });
+
+    */
+
+    
+    /*
     const client = dgram.createSocket('udp4');
 
     // Set the broadcast option to true
@@ -206,6 +243,7 @@ function sendBroadcastMessage(message) {
         // Close the client after sending the message
         client.close();
     });
+    */
 }
 
 

@@ -14,7 +14,8 @@
                 <div class="clickable-area left" id="leftArea">Links</div>
                 <div class="clickable-area right" id="rightArea">Rechts</div>
 
-            <div class="settings-icon" id="settingsIcon">⚙️</div>
+                <div class="settings-icon" id="settingsIconSpeed">⚙️</div>
+                <div class="settings-icon" id="settingsIconColor">⚙️</div>
         </div>
 
         
@@ -153,7 +154,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const rightArea = document.querySelector('.right');
     const forwardArea = document.querySelector('.forward');
     const backwardArea = document.querySelector('.backward');
-    const settingsIcon = document.getElementById('settingsIcon');
+    const settingsIconSpeed = document.getElementById('settingsIconSpeed');
+    const settingsIconColor = document.getElementById('settingsIconColor');
     const speedSelector = document.getElementById('speedSelector');
     const confirmSpeedBtn = document.getElementById('confirmSpeed');
     const speedSelect = document.getElementById('speed');
@@ -161,8 +163,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmColorBtn = document.getElementById('confirmColor');
     const colorInput = document.getElementById('color');
 
-    settingsIcon.addEventListener('click', function () {
+    settingsIconSpeed.addEventListener('click', function () {
+
         speedSelector.style.display = 'block';
+
+    });
+
+    settingsIconColor.addEventListener('click', function () {
+
+        colorSelector.style.display = 'block';
+
     });
 
     confirmSpeedBtn.addEventListener('click', function () {
@@ -173,9 +183,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    settingsIcon.addEventListener('click', function () {
-        colorSelector.style.display = 'block';
-    });
 
     // Handle color confirmation
     confirmColorBtn.addEventListener('click', function () {
@@ -188,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const r = parseInt(selectedColor.slice(0, 2), 16);
         const g = parseInt(selectedColor.slice(2, 4), 16);
         const b = parseInt(selectedColor.slice(4, 6), 16);
-
+        
         rgb = r+":"+g+":"+b;
         
 
@@ -305,30 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         fetchCommand('/sendMovement',command)
-
-        /*
-        fetch('/sendMovement', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(command)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Server response:', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-
-    */
-   
+        
     }
     
 
@@ -364,28 +348,6 @@ document.addEventListener('DOMContentLoaded', function () {
         
         fetchCommand('/sendSpeed', command);
 
-        /*
-        fetch('/sendSpeed', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(command)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Server response:', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-    */
 }
     
 });
