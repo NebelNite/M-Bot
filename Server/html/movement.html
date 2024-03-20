@@ -29,8 +29,7 @@
             </select>
             <button id="confirmSpeed">Bestätigen</button>
         </div>
-
-       
+        
         <div class="color-selector" id="colorSelector">
             <label for="color">Wähle eine Farbe:</label>
             <input type="color" id="color" name="color" value="#ff0000">
@@ -48,8 +47,6 @@
 .color-selector {
     display: none; /* Initially hidden, can be shown like the speed selector */
     position: fixed;
-    top: 50%;
-    left: 50%;
     transform: translate(-50%, -50%);
     background-color: white;
     padding: 20px;
@@ -127,8 +124,6 @@ div{
 .speed-selector {
     display: none;
     position: fixed;
-    top: 50%;
-    left: 50%;
     transform: translate(-50%, -50%);
     background-color: white;
     padding: 20px;
@@ -139,11 +134,25 @@ div{
 .speed-selector label,
 .speed-selector button {
     display: block;
-    margin: 10px auto; 
+    margin: 10px auto;
     width: 80%; 
     height: 70px; 
     font-size: 20px;
 }
+
+.speed-selector
+{
+    left: 2%;
+    top: 20%;
+    transform: translateY(-50%);
+}
+.color-selector
+{
+    left: 75%;
+    top: 20%;
+    transform: translateY(-50%);
+}
+
 
 </style>
 
@@ -312,7 +321,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         fetchCommand('/sendMovement',command)
-        
+
+   
     }
     
 
@@ -347,8 +357,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function sendSpeed(command) {
         
         fetchCommand('/sendSpeed', command);
-
-}
+        
+    }
     
 });
      </script> 

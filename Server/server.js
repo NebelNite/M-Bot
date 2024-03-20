@@ -179,15 +179,13 @@ function sendCommandToMbot(command) {
 function requireLogin(req, res, next) {
     if (req.session && req.session.loggedIn) {
 
-        // Aufruf der Funktion zum Durchführen des Netzwerkscans für mehrere Subnetze
+
+        const subnetsToScan = ['10.10.0','10.10.1'];
         
-        const subnetsToScan = ['10.10'];
-
         scanNetwork(subnetsToScan);
-
+        
         //sendBroadcastMessage("MBotDiscovery");
-
-
+        
         listenForUdpMessages();
 
         return next();
