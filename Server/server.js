@@ -9,6 +9,7 @@ const fs = require('fs');
 const dgram = require('dgram');
 
 
+
 const port = 3001;
 //const ip = '192.168.0.22';
 const ip = '10.10.0.172';
@@ -69,30 +70,61 @@ app.post('/sendMovement', (req, res) => {
 
     command = req.body;
 
-    console.log('Movement sent');
 
-    sendDirectionToMBot(command, command.direction);
-    
+    sendDirectionToMBot(command.direction);
+    res.end();
+
 });
 
 
 
 
-function sendDirectionToMBot(message, text) {
+app.post('/sendSpeed', (req, res) => {
 
+    command = req.body;
+    
+    sendDirectionToMBot(command.speed);
+
+    res.end();
+    
+});
+
+
+app.post('/sendColor', (req, res) => {
+
+    command = req.body;
+    
+    sendDirectionToMBot(command);
+
+    res.end();
+    
+});
+
+
+
+function sendDirectionToMBot(command) {
+
+
+    if(command.typ != null)
+    {
+        if(command.color != null)
+        {
+            command = `${command.typ}:${command.color}`;
+        }
+    }
+    
 
     if(mBotIp != undefined && mBotPort != undefined)
     {
         const client = dgram.createSocket('udp4');
-        const direction = message.direction.toString(); // Stelle sicher, dass die Richtung als Zeichenfolge formatiert ist
-        const buffer = Buffer.from(direction); // Konvertiere die Richtung in einen Puffer
+        const buffer = Buffer.from(command.toString());
 
 
         client.send(buffer, 0, buffer.length, mBotIp.port, mBotIp.address, (error) => {
             if (error) {
                 console.error(`Fehler beim Senden der Nachricht an ${mBotIp}:${mBotPort}:`, error);
             } else {
-                console.log(`Nachricht erfolgreich an ${mBotIp.address}:${mBotPort.port} gesendet: ${direction}`);
+                console.log(`Nachricht erfolgreich an ${mBotIp.address}:${mBotPort.port} gesendet: ${command}`);
             }
             client.close();
         });

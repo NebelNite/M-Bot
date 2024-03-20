@@ -6,7 +6,7 @@
         <title>Document</title>
         <link type="text/css" href="/css/movement.css">
     </head>
-    
+
     <body>
         <div class="grid-container">
                 <div class="clickable-area forward" id="forwardArea">Vorwärts</div>
@@ -28,12 +28,44 @@
             </select>
             <button id="confirmSpeed">Bestätigen</button>
         </div>
+
+       
+        <div class="color-selector" id="colorSelector">
+            <label for="color">Wähle eine Farbe:</label>
+            <input type="color" id="color" name="color" value="#ff0000">
+            <button id="confirmColor">Bestätigen</button>
+        </div>
+
     </body>
 
     <!-- 
     <script src="../js/movement.js"></script>
      -->
 <style>
+
+
+.color-selector {
+    display: none; /* Initially hidden, can be shown like the speed selector */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.color-selector label,
+.color-selector input,
+.color-selector button {
+    display: block;
+    margin: 10px auto;
+    width: 80%;
+}
+
+
+
     .right,
 .left {
     background-color: orange;
@@ -125,39 +157,55 @@ document.addEventListener('DOMContentLoaded', function () {
     const speedSelector = document.getElementById('speedSelector');
     const confirmSpeedBtn = document.getElementById('confirmSpeed');
     const speedSelect = document.getElementById('speed');
+    const colorSelector = document.getElementById('colorSelector');
+    const confirmColorBtn = document.getElementById('confirmColor');
+    const colorInput = document.getElementById('color');
 
     settingsIcon.addEventListener('click', function () {
         speedSelector.style.display = 'block';
     });
 
     confirmSpeedBtn.addEventListener('click', function () {
-        const selectedSpeed = speedSelect.value;
+        let selectedSpeed = speedSelect.value;
         console.log('Selected Speed:', selectedSpeed);
         speedSelector.style.display = 'none';
     });
 
-    function handleMouseOver(direction) {
-
-        console.log('Mouse Over!');
 
 
+    settingsIcon.addEventListener('click', function () {
+        colorSelector.style.display = 'block';
+    });
+
+    // Handle color confirmation
+    confirmColorBtn.addEventListener('click', function () {
+        let selectedColor = colorInput.value;
+        console.log('Selected Color:', selectedColor);
+        colorSelector.style.display = 'none';
+
+        
         const command = {
-            direction: direction
+            typ: '8',
+            color: selectedColor
+
         };
+        
+        sendColor(command);
+    });
 
-        sendMovement(command);
-
+    
+    function sendColor(command) {
+        
+        fetchCommand('/sendColor', command);
     }
+    
 
-    function handleMouseOut() {
-        console.log('Mouse Out!');
+    
 
-        const command = {
-            direction: -1
-        };
-
-
-        fetch('/sendMovement', {
+    function fetchCommand(route,command)
+    {
+        
+        fetch(route, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -176,9 +224,41 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => {
             console.error('Error:', error);
         });
+    }
+
+
+    
+
+    function handleMouseOver(direction) {
+
+
+        console.log('Mouse Over!');
+
+        
+        const command = {
+            typ: direction,
+            direction: direction
+        };
+        
+
+        sendMovement(command);
 
     }
 
+    function handleMouseOut() {
+
+        console.log('Mouse Out!');
+
+        
+        const command = {
+            typ: -1,
+            direction: -1
+        };
+
+
+        sendMovement(command);
+    }
+    
 
 
 
@@ -210,12 +290,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-
-
     
+
+
     function sendMovement(command) {
 
-        
+
+        fetchCommand('/sendMovement',command)
+
+        /*
         fetch('/sendMovement', {
             method: 'POST',
             headers: {
@@ -236,25 +319,44 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error:', error);
         });
 
-
+    */
+   
     }
-
+    
 
     confirmSpeedBtn.addEventListener('click', function () {
-        const selectedSpeed = speedSelect.value;
+
+        let selectedSpeed = speedSelect.value;
         console.log('Selected Speed:', selectedSpeed);
         speedSelector.style.display = 'none';
 
-        sendSpeed(selectedSpeed);
-});
-
-    function sendSpeed(speed) {
+        if(selectedSpeed == "medium")
+        {
+            selectedSpeed = '6';
+        }
+        else if(selectedSpeed == 'slow')
+        {
+            selectedSpeed = '5';
+        }
+        else if(selectedSpeed == 'fast')
+        {
+            selectedSpeed = '7';
+        }
+        
 
         const command = {
-            speed: speed
+            speed,typ: selectedSpeed
         };
+        
+        sendSpeed(command);
+});
 
-        fetch('/speed', {
+    function sendSpeed(command) {
+        
+        fetchCommand('/sendSpeed', command);
+
+        /*
+        fetch('/sendSpeed', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -274,6 +376,8 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error:', error);
         });
     }
+    */
+}
     
 });
      </script> 

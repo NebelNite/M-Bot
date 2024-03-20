@@ -139,7 +139,7 @@ while True:
         cyberpi.mbot2.EM_stop(port = "all")
         
         moveForward()
-        
+
     elif data.decode() == "2":
         response_message = "MoveBackwards"
         udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
