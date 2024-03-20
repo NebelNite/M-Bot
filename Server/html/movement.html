@@ -190,13 +190,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const b = parseInt(selectedColor.slice(4, 6), 16);
 
         rgb = r+":"+g+":"+b;
-
+        
 
         const command = {
             typ: '8',
             command: rgb
-
         };
+        
         
         sendColor(command);
     });

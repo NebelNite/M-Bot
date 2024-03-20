@@ -7,6 +7,8 @@ const session = require('express-session');
 const https = require('https');
 const fs = require('fs');
 const dgram = require('dgram');
+const ping = require('ping');
+
 
 
 
@@ -71,7 +73,7 @@ app.post('/sendMovement', (req, res) => {
     command = req.body;
 
 
-    sendDirectionToMBot(command);
+    sendCommandToMbot(command);
     res.end();
 
 });
@@ -83,7 +85,7 @@ app.post('/sendSpeed', (req, res) => {
 
     command = req.body;
     
-    sendDirectionToMBot(command);
+    sendCommandToMbot(command);
 
     res.end();
     
@@ -94,7 +96,7 @@ app.post('/sendColor', (req, res) => {
 
     command = req.body;
     
-    sendDirectionToMBot(command);
+    sendCommandToMbot(command);
 
     res.end();
     
@@ -102,17 +104,17 @@ app.post('/sendColor', (req, res) => {
 
 
 
-function sendDirectionToMBot(command) {
+function sendCommandToMbot(command) {
 
     command = command.typ + ';' + command.command;
-    
 
+    
     if(mBotIp != undefined && mBotPort != undefined)
     {
         const client = dgram.createSocket('udp4');
         const buffer = Buffer.from(command.toString());
-
-
+        
+        
         client.send(buffer, 0, buffer.length, mBotIp.port, mBotIp.address, (error) => {
             if (error) {
                 console.error(`Fehler beim Senden der Nachricht an ${mBotIp}:${mBotPort}:`, error);
@@ -135,6 +137,7 @@ function requireLogin(req, res, next) {
         // Aufruf der Funktion zum Durchführen des Netzwerkscans für mehrere Subnetze
         
         const subnetsToScan = ['10.10']; // Subnetze
+        
         scanNetwork(subnetsToScan);
 
         listenForUdpMessages();
@@ -149,7 +152,6 @@ function requireLogin(req, res, next) {
 const broadcastPort = 1234;
 const client = dgram.createSocket('udp4');
 
-const ping = require('ping');
 
 function scanNetwork(subnets) {
     const promises = [];
@@ -166,7 +168,7 @@ function scanNetwork(subnets) {
         .then(results => {
             const reachableDevices = results.filter(result => result.alive).map(result => result.host);
             console.log('Erreichbare Geräte im Netzwerk:', reachableDevices);
-
+            
             sendMessageToDevices(reachableDevices,"MBotDiscovery");
 
         })
