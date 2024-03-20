@@ -28,6 +28,14 @@
             </select>
             <button id="confirmSpeed">Bestätigen</button>
         </div>
+
+        <div class="color-selector" id="colorSelector">
+            <label for="color">Wähle eine Farbe:</label>
+            <input type="color" id="color" name="color" value="#ff0000">
+            <button id="confirmColor">Bestätigen</button>
+        </div>
+        
+
     </body>
 
     <!-- 
@@ -112,6 +120,27 @@ div{
     font-size: 20px;
 }
 
+.color-selector {
+    display: none; /* Initially hidden, can be shown like the speed selector */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.color-selector label,
+.color-selector input,
+.color-selector button {
+    display: block;
+    margin: 10px auto;
+    width: 80%;
+}
+
+
 </style>
 
 
@@ -125,6 +154,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const speedSelector = document.getElementById('speedSelector');
     const confirmSpeedBtn = document.getElementById('confirmSpeed');
     const speedSelect = document.getElementById('speed');
+    const colorSelector = document.getElementById('colorSelector');
+    const confirmColorBtn = document.getElementById('confirmColor');
+    const colorInput = document.getElementById('color');
 
     settingsIcon.addEventListener('click', function () {
         speedSelector.style.display = 'block';
@@ -177,6 +209,22 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error:', error);
         });
 
+    }
+
+    settingsIcon.addEventListener('click', function () {
+        colorSelector.style.display = 'block';
+    });
+
+    // Handle color confirmation
+    confirmColorBtn.addEventListener('click', function () {
+        const selectedColor = colorInput.value;
+        console.log('Selected Color:', selectedColor);
+        colorSelector.style.display = 'none';
+        applyColor(selectedColor);
+    });
+
+    function applyColor(color) {
+        console.log(color);
     }
 
 
