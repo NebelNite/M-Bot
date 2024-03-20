@@ -71,7 +71,7 @@ app.post('/sendMovement', (req, res) => {
     command = req.body;
 
 
-    sendDirectionToMBot(command.direction);
+    sendDirectionToMBot(command);
     res.end();
 
 });
@@ -83,7 +83,7 @@ app.post('/sendSpeed', (req, res) => {
 
     command = req.body;
     
-    sendDirectionToMBot(command.speed);
+    sendDirectionToMBot(command);
 
     res.end();
     
@@ -104,14 +104,7 @@ app.post('/sendColor', (req, res) => {
 
 function sendDirectionToMBot(command) {
 
-
-    if(command.typ != null)
-    {
-        if(command.color != null)
-        {
-            command = `${command.typ}:${command.color}`;
-        }
-    }
+    command = command.typ + ';' + command.command;
     
 
     if(mBotIp != undefined && mBotPort != undefined)

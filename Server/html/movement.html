@@ -183,10 +183,18 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Selected Color:', selectedColor);
         colorSelector.style.display = 'none';
 
-        
+        selectedColor = selectedColor.replace('#', '');
+
+        const r = parseInt(selectedColor.slice(0, 2), 16);
+        const g = parseInt(selectedColor.slice(2, 4), 16);
+        const b = parseInt(selectedColor.slice(4, 6), 16);
+
+        rgb = r+":"+g+":"+b;
+
+
         const command = {
             typ: '8',
-            color: selectedColor
+            command: rgb
 
         };
         
@@ -237,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
         const command = {
             typ: direction,
-            direction: direction
+            command: direction
         };
         
 
@@ -252,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
         const command = {
             typ: -1,
-            direction: -1
+            command: -1
         };
 
 
@@ -345,7 +353,8 @@ document.addEventListener('DOMContentLoaded', function () {
         
 
         const command = {
-            speed,typ: selectedSpeed
+            command: selectedSpeed,
+            typ: selectedSpeed
         };
         
         sendSpeed(command);
