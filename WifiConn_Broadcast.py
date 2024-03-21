@@ -7,7 +7,8 @@ import machine
 import ussl as ssl
 import mbot2
 import event
-
+import os
+import RPi.GPIO as GPIO
 
 
 
@@ -18,6 +19,8 @@ def moveForward():
 def moveBackwards():
     cyberpi.mbot2.EM_stop(port = "all")
     cyberpi.mbot2.drive_power(-speed,speed)
+
+
 
 
 #1
@@ -43,12 +46,15 @@ time.sleep(0.1)
 cyberpi.mbot2.EM_stop(port = "all")
 """
 
+    
+
+    
 # Blue
 cyberpi.led.on(0, 0, 255)
 
 # Check if connected to the Wi-Fi network
 while True:
-    
+
     # Connect to Wi-Fi
     cyberpi.network.config_sta("htljoh-public", "joh12345")
     
@@ -157,7 +163,7 @@ while True:
         
         cyberpi.mbot2.EM_stop(port = "all")
 
-    
+
     # speed
     # 5: slow; 6: medium; 7: fast
     
@@ -191,9 +197,14 @@ while True:
         g = int(rgb_components[1])
         b = int(rgb_components[2])
         
-        cyberpi.led.on(r,g,b)  
+        cyberpi.led.on(r,g,b)
         
-    
+    # shutdown: 9
+    elif commandTyp == "9":
+        GPIO.setmode(GPIO.BCM)  
+        GPIO.setup(3, GPIO.IN, pull_up_down = GPIO.PUD_UP)  
+        os.system("sudo shutdown -h now") 
+
     
 """
 cyberpi.mbot2.drive_power(100,0)

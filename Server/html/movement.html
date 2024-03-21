@@ -7,155 +7,169 @@
         <link type="text/css" href="/css/movement.css">
     </head>
 
+
     <body>
-        <div class="grid-container">
+        <header>
+            <h1>MBot</h1>
+        </header>
+    
+        <main>
+            <div class="grid-container">
                 <div class="clickable-area forward" id="forwardArea">Vorwärts</div>
                 <div class="clickable-area backward" id="backwardArea">Rückwärts</div>
                 <div class="clickable-area left" id="leftArea">Links</div>
                 <div class="clickable-area right" id="rightArea">Rechts</div>
-
-                <div class="settings-icon" id="settingsIconSpeed">⚙️</div>
-                <div class="settings-icon" id="settingsIconColor">⚙️</div>
-        </div>
-
-        
+            </div>
     
-        <div class="speed-selector" id="speedSelector">
-            <label for="speed">Geschwindigkeit:</label>
-            <select name="speed" id="speed">
-                <option value="slow">Langsam</option>
-                <option value="medium">Mittel</option>
-                <option value="fast">Schnell</option>
-            </select>
-            <button id="confirmSpeed">Bestätigen</button>
-        </div>
+            <div class="settings-icons">
+                <div class="settings-icon" id="settingsIconSpeed">⚙️</div>
+                <div class="settings-icon" id="settingsIconColor">🔧</div>
+            </div>
+    
+            <div class="settings-panel" id="speedSelector">
+                <label for="speed">Geschwindigkeit:</label>
+                <select name="speed" id="speed">
+                    <option value="slow">Langsam</option>
+                    <option value="medium">Mittel</option>
+                    <option value="fast">Schnell</option>
+                </select>
+                <button id="confirmSpeed">Bestätigen</button>
+            </div>
+            
+            <div class="settings-panel" id="colorSelector">
+                <label for="color">Wähle eine Farbe:</label>
+                <input type="color" id="color" name="color" value="#ff0000">
+                <button id="confirmColor">Bestätigen</button>
+            </div>
+        </main>
+    
+        <footer>
+            <p>&copy; 2024 Remote Control. All rights reserved.</p>
+        </footer>
+
         
-        <div class="color-selector" id="colorSelector">
-            <label for="color">Wähle eine Farbe:</label>
-            <input type="color" id="color" name="color" value="#ff0000">
-            <button id="confirmColor">Bestätigen</button>
-        </div>
-
     </body>
-
     <!-- 
     <script src="../js/movement.js"></script>
-     -->
-<style>
+     -->    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative; 
+        }
 
 
-.color-selector {
-    display: none; /* Initially hidden, can be shown like the speed selector */
-    position: fixed;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border: 1px solid black;
-    text-align: center;
-}
+        .right {
+            grid-area: r;
+        }
 
-.color-selector label,
-.color-selector input,
-.color-selector button {
-    display: block;
-    margin: 10px auto;
-    width: 80%;
-}
+        .left {
+            grid-area: l;
+
+        }
 
 
+        .forward {
+            grid-area: f;
+            margin-top: 10px;
+        }
 
-    .right,
-.left {
-    background-color: orange;
-}
+        .backward {
+            grid-area: b;
+        }
 
-.forward,
-.backward {
-    background-color: rgb(86, 198, 236);
-}
+        
+        .grid-container {
+            
+            width: 80%;
+            height: 80vh;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            grid-template-areas: '. f .' 
+                                'l b r' 
+                                '. . .';
+            grid-gap: 10px;
+        }
 
-.right {
-    grid-area: r;
-}
+        .clickable-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-.left {
-    grid-area: l;
+        .clickable-area:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
 
-}
+        .settings-icons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+        }
 
+        .settings-icon {
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
 
-.forward {
-    grid-area: f;
-}
+        .settings-icon:hover {
+            transform: rotate(45deg);
+        }
 
-.backward {
-    grid-area: b;
-}
+        .settings-panel {
+            display: none;
+            position: absolute;
+            top: 15%;
+            left: 80%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
 
-div{
-    border-radius: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+        .settings-panel label,
+        .settings-panel button {
+            display: block;
+            margin: 10px auto;
+            width: 80%;
+        }
 
-}
-
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    grid-template-areas: '. f .' 
-                         'l b r'
-                         '. . .';
-    grid-gap: 10px;
-    height: 100vh;
-}
-
-.settings-icon {
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-    
-}
-.settings-icon:hover{
-    transform: rotate(45deg);
-}
-
-.speed-selector {
-    display: none;
-    position: fixed;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border: 1px solid black;
-    text-align: center;
-}
-
-.speed-selector label,
-.speed-selector button {
-    display: block;
-    margin: 10px auto;
-    width: 80%; 
-    height: 70px; 
-    font-size: 20px;
-}
-
-.speed-selector
-{
-    left: 2%;
-    top: 20%;
-    transform: translateY(-50%);
-}
-.color-selector
-{
-    left: 75%;
-    top: 20%;
-    transform: translateY(-50%);
-}
-
-
-</style>
-
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+    </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -254,7 +268,6 @@ document.addEventListener('DOMContentLoaded', function () {
     
 
     function handleMouseOver(direction) {
-
 
         console.log('Mouse Over!');
 

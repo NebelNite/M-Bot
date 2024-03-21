@@ -58,6 +58,9 @@ let broadcastip = broadcastAddressParts.join(".");
 //const ip = '10.10.0.172';
 const fixPassword = process.env.PASSWORD_HASH;
 
+let mBotIp, mBotPort = 12345;
+let mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+
 
 const options = {
     key: fs.readFileSync(__dirname + '/key.pem'),
@@ -169,23 +172,22 @@ function sendCommandToMbot(command) {
             client.close();
         });
     }
-
 }
 
-
-
-
+let subnets = '10.10.3';
 
 function requireLogin(req, res, next) {
     if (req.session && req.session.loggedIn) {
-
-
-        const subnetsToScan = ['10.10.0','10.10.1'];
         
-        scanNetwork(subnetsToScan);
-        
+        const subnetsToScan = [subnets];
+
+        if(mBotIp == null)
+        {
+            scanNetwork(subnetsToScan);
+        }
+
         //sendBroadcastMessage("MBotDiscovery");
-        
+
         listenForUdpMessages();
 
         return next();
@@ -246,6 +248,7 @@ function sendBroadcastMessage(message) {
 
 
 function scanNetwork(subnets) {
+    
     const promises = [];
 
     subnets.forEach(subnet => {
@@ -305,11 +308,6 @@ function sendMessageToDevices(devices, message) {
 }
 
 
-let mBotIp, mBotPort = 12345;
-
-
-
-
 function listenForUdpMessages() {
 
     // Create a UDP server
@@ -328,11 +326,18 @@ function listenForUdpMessages() {
       if (message.toString() === 'MBotDiscovered') {
         console.log('Received message:', message);
         console.log('From address:', remote);
-        mBotIp = remote;
+        
+        mBotIp = remote.address;
+        mBotPort = remote.port;
 
         // Send a response message
         const responseMessage = 'Connected to Server';
         server.send(responseMessage, remote.port, remote.address);
+
+        
+        mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+
+
 
       }
     });
@@ -342,8 +347,28 @@ function listenForUdpMessages() {
       server.close();
     };
   }
+  
 
-
+  function checkMbotConnection() {
+    const subnetsToScan = [subnets];
+    if (!mBotIp) {
+      scanNetwork(subnetsToScan);
+    }
+  
+    const message = "mBotTest";
+  
+    const client = dgram.createSocket('udp4');
+  
+    client.send(message, 0, message.length, mBotPort, mBotIp, (error) => {
+      if (error) {
+        console.error(`Fehler beim Senden der Testnachricht an ${mBotIp}:${mBotPort}:`, error);
+        mBotIp = null;
+        console.warn("Verbindung zum mBot verloren!");
+      }
+  
+      client.close();
+    });
+  }
 
 app.get('/login', (req, res) => {
     res.sendFile(__dirname + "/html/login.html");
