@@ -7,12 +7,62 @@ const session = require('express-session');
 const https = require('https');
 const fs = require('fs');
 const dgram = require('dgram');
+const ping = require('ping');
+const os = require('os');
+const socketIo = require('socket.io');
+
+const udpBroadcast = require('udp-broadcast');
+const internal = require('stream');
+
 
 
 const port = 3001;
-//const ip = '192.168.0.22';
-const ip = '10.10.0.172';
+
+let mBotIp, mBotPort = 12345;
+let mbotData = undefined;
+
+const client = dgram.createSocket('udp4');
+
+
+
+let ipv4Addresses = [];
+
+const networkInterfaces = os.networkInterfaces();
+
+for (const [name, interfaces] of Object.entries(networkInterfaces)) {
+  for (const interfaceDetails of interfaces) {
+    if (interfaceDetails.family === 'IPv4') {
+      ipv4Addresses.push(interfaceDetails);
+    }
+  }
+}
+
+if (ipv4Addresses.length === 0) {
+  console.error('Keine IPv4-Adresse vorhanden.');
+  process.exit(1);
+}
+
+
+const ip = ipv4Addresses[0].address;
+const SUBNET_MASK = "255.255.255.0";
+
+const ipv4AddressParts = ip.split(".").map(Number);
+const subnetMaskParts = SUBNET_MASK.split(".").map(Number);
+
+// Berechnung der Broadcast-Adresse
+const broadcastAddressParts = ipv4AddressParts.map((part, i) => {
+  return part | (255 - subnetMaskParts[i]);
+});
+
+// Ergebnis ausgeben
+let broadcastip = broadcastAddressParts.join(".");
+
+
+//const ip = '10.10.0.172';
 const fixPassword = process.env.PASSWORD_HASH;
+
+//let mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+
 
 const options = {
     key: fs.readFileSync(__dirname + '/key.pem'),
@@ -20,9 +70,8 @@ const options = {
     rejectUnauthorized: false
 };
 
-const app = express();
 
-const server = https.createServer(options, app);
+const app = express();
 
 app.use(session({
     secret: 'mysecret',
@@ -32,9 +81,13 @@ app.use(session({
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-
 app.use(express.static('public'));
+
+
+const server = https.createServer(options, app);
+
+const io = socketIo(server);
+
 
 app.get('*/css/.css', function (req, res, next) {
     res.set('Content-Type', 'text/css');
@@ -69,48 +122,73 @@ app.post('/sendMovement', (req, res) => {
 
     command = req.body;
 
-    console.log('Movement sent');
 
-    sendDirectionToMBot(command, command.direction);
-    
+    sendCommandToMbot(command);
+    res.end();
+
 });
 
 
 
 
-function sendDirectionToMBot(message, text) {
+app.post('/sendSpeed', (req, res) => {
+
+    command = req.body;
+    
+    sendCommandToMbot(command);
+
+    res.end();
+    
+});
 
 
-    if(mBotIp != undefined && mBotPort != undefined)
+app.post('/sendColor', (req, res) => {
+
+    command = req.body;
+    
+    sendCommandToMbot(command);
+
+    res.end();
+    
+});
+
+
+
+function sendCommandToMbot(command) {
+
+    command = command.typ + ';' + command.command;
+    
+    if(mbotData != undefined)
     {
         const client = dgram.createSocket('udp4');
-        const direction = message.direction.toString(); // Stelle sicher, dass die Richtung als Zeichenfolge formatiert ist
-        const buffer = Buffer.from(direction); // Konvertiere die Richtung in einen Puffer
+        const buffer = Buffer.from(command.toString());
+        
 
-
-        client.send(buffer, 0, buffer.length, mBotIp.port, mBotIp.address, (error) => {
+        client.send(buffer, 0, buffer.length, mbotData.port, mbotData.address, (error) => {
             if (error) {
-                console.error(`Fehler beim Senden der Nachricht an ${mBotIp}:${mBotPort}:`, error);
+                console.error(`Fehler beim Senden der Nachricht an ${mbotData.address}:${mbotData.port}:`, error);
             } else {
-                console.log(`Nachricht erfolgreich an ${mBotIp.address}:${mBotPort.port} gesendet: ${direction}`);
+                console.log(`Nachricht erfolgreich an ${mbotData.address}:${mbotData.port} gesendet: ${command}`);
             }
             client.close();
         });
     }
-
 }
 
 
-
-
+let subnets = '10.10.1';
 
 function requireLogin(req, res, next) {
     if (req.session && req.session.loggedIn) {
-
-        // Aufruf der Funktion zum Durchführen des Netzwerkscans für mehrere Subnetze
         
-        const subnetsToScan = ['10.10']; // Subnetze
-        scanNetwork(subnetsToScan);
+        const subnetsToScan = [subnets];
+
+        if(mBotIp == null)
+        {
+            scanNetwork(subnetsToScan);
+        }
+
+        //sendBroadcastMessage("MBotDiscovery");
 
         listenForUdpMessages();
 
@@ -121,12 +199,58 @@ function requireLogin(req, res, next) {
 }
 
 
-const broadcastPort = 1234;
-const client = dgram.createSocket('udp4');
 
-const ping = require('ping');
+
+function sendBroadcastMessage(message) {
+
+/*
+    // Set the broadcast options
+    const broadcastOptions = {
+      host: '255.255.255.255',
+      port: 1234,
+      multicast: false
+    };
+    
+    // Set the message to send
+    //message = Buffer.from('hello world');
+
+    
+
+    // Create a UDP socket and send the broadcast message
+    udpBroadcast.send(broadcastOptions, message, (error) => {
+      if (error) {
+        console.error('Error sending broadcast message:', error);
+      } else {
+        console.log('Broadcast message sent successfully!');
+      }
+    });
+
+    */
+
+    
+    /*
+    const client = dgram.createSocket('udp4');
+
+    // Set the broadcast option to true
+    client.setBroadcast(true);
+
+    // Send the message to the broadcast address
+    client.send(message, 0, message.length, mBotPort, '255.255.255.255', (error) => {
+        if (error) {
+            console.error(`Fehler beim Senden der Broadcast-Nachricht:`, error);
+        } else {
+            console.log(`Broadcast-Nachricht erfolgreich gesendet: ${message}`);
+        }
+
+        // Close the client after sending the message
+        client.close();
+    });
+    */
+}
+
 
 function scanNetwork(subnets) {
+    
     const promises = [];
 
     subnets.forEach(subnet => {
@@ -141,7 +265,7 @@ function scanNetwork(subnets) {
         .then(results => {
             const reachableDevices = results.filter(result => result.alive).map(result => result.host);
             console.log('Erreichbare Geräte im Netzwerk:', reachableDevices);
-
+            
             sendMessageToDevices(reachableDevices,"MBotDiscovery");
 
         })
@@ -152,13 +276,14 @@ function scanNetwork(subnets) {
 
 
 function sendMessageToDevices(devices, message) {
+
     const client = dgram.createSocket('udp4');
 
     let promises = [];
 
     devices.forEach(device => {
         const promise = new Promise((resolve, reject) => {
-            client.send(message, 0, message.length, mBotPort, device, (error) => {
+            client.send(message, 0, message.length, 12345, device, (error) => {
                 if (error) {
                     console.error(`Fehler beim Senden der Nachricht an ${device}:`, error);
                     reject(error);
@@ -182,18 +307,15 @@ function sendMessageToDevices(devices, message) {
             console.error('Fehler beim Senden der Nachrichten:', error);
             client.close();
         });
-
-
 }
 
-let mBotIp, mBotPort = 12345;
 
 
 function listenForUdpMessages() {
 
     // Create a UDP server
     const server = dgram.createSocket('udp4');
-
+    
     // Bind the server to a port and IP address
     server.bind(mBotPort, '0.0.0.0');
     
@@ -207,11 +329,16 @@ function listenForUdpMessages() {
       if (message.toString() === 'MBotDiscovered') {
         console.log('Received message:', message);
         console.log('From address:', remote);
-        mBotIp = remote;
+
+        mbotData = remote;
 
         // Send a response message
         const responseMessage = 'Connected to Server';
         server.send(responseMessage, remote.port, remote.address);
+
+        
+        //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+
 
       }
     });
@@ -221,8 +348,28 @@ function listenForUdpMessages() {
       server.close();
     };
   }
+  
 
+  function checkMbotConnection() {
+    const subnetsToScan = [subnets];
+    if (!mBotIp) {
+      scanNetwork(subnetsToScan);
+    }
+  
+    const message = "mBotTest";
+  
+    const client = dgram.createSocket('udp4');
+  
+    client.send(message, 0, message.length, mBotPort, mBotIp, (error) => {
+      if (error) {
+        console.error(`Fehler beim Senden der Testnachricht an ${mBotIp}:${mBotPort}:`, error);
+        mBotIp = null;
+        console.warn("Verbindung zum mBot verloren!");
+      }
 
+      client.close();
+    });
+  }
 
 app.get('/login', (req, res) => {
     res.sendFile(__dirname + "/html/login.html");
@@ -251,6 +398,43 @@ app.post('/login', checkPassword);
 
 server.listen(port, ip, () => {
     
-    console.log(`Server läuft auf https://${"10.10.0.172"}:${port}/movement`);
+    console.log(`Server läuft auf https://${ip}:${port}/movement`);
 });
 
+
+
+
+    // Create a UDP server
+    const server = dgram.createSocket('udp4');
+    
+    // Bind the server to a port and IP address
+    server.bind(mBotPort, '0.0.0.0');
+    
+    console.log("Listening");
+
+    // Handle incoming messages
+    server.on('message', (message, remote) => {
+
+        console.log(message.toString());
+
+      if (message.toString() === 'MBotDiscovered') {
+        console.log('Received message:', message);
+        console.log('From address:', remote);
+
+        mbotData = remote;
+
+        // Send a response message
+        const responseMessage = 'Connected to Server';
+        server.send(responseMessage, remote.port, remote.address);
+
+        
+        //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+
+
+      }
+    });
+  
+    // Close the server when the function is no longer needed
+    return () => {
+      server.close();
+    };

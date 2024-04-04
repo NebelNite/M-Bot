@@ -6,143 +6,169 @@
         <title>Document</title>
         <link type="text/css" href="/css/movement.css">
     </head>
-    
+
+
     <body>
-        <div class="grid-container">
+        <header>
+            <h1>MBot</h1>
+        </header>
+    
+        <main>
+            <div class="grid-container">
                 <div class="clickable-area forward" id="forwardArea">Vorwärts</div>
                 <div class="clickable-area backward" id="backwardArea">Rückwärts</div>
                 <div class="clickable-area left" id="leftArea">Links</div>
                 <div class="clickable-area right" id="rightArea">Rechts</div>
-
-            <div class="settings-icon" id="settingsIcon">⚙️</div>
-        </div>
-
-        
+            </div>
     
-        <div class="speed-selector" id="speedSelector">
-            <label for="speed">Geschwindigkeit:</label>
-            <select name="speed" id="speed">
-                <option value="slow">Langsam</option>
-                <option value="medium">Mittel</option>
-                <option value="fast">Schnell</option>
-            </select>
-            <button id="confirmSpeed">Bestätigen</button>
-        </div>
-
-        <div class="color-selector" id="colorSelector">
-            <label for="color">Wähle eine Farbe:</label>
-            <input type="color" id="color" name="color" value="#ff0000">
-            <button id="confirmColor">Bestätigen</button>
-        </div>
-        
+            <div class="settings-icons">
+                <div class="settings-icon" id="settingsIconSpeed">⚙️</div>
+                <div class="settings-icon" id="settingsIconColor">🔧</div>
+            </div>
+    
+            <div class="settings-panel" id="speedSelector">
+                <label for="speed">Geschwindigkeit:</label>
+                <select name="speed" id="speed">
+                    <option value="slow">Langsam</option>
+                    <option value="medium">Mittel</option>
+                    <option value="fast">Schnell</option>
+                </select>
+                <button id="confirmSpeed">Bestätigen</button>
+            </div>
+            
+            <div class="settings-panel" id="colorSelector">
+                <label for="color">Wähle eine Farbe:</label>
+                <input type="color" id="color" name="color" value="#ff0000">
+                <button id="confirmColor">Bestätigen</button>
+            </div>
+        </main>
+    
+        <footer>
+            <p>&copy; 2024 Remote Control. All rights reserved.</p>
+        </footer>
 
     </body>
-
     <!-- 
     <script src="../js/movement.js"></script>
-     -->
-<style>
-    .right,
-.left {
-    background-color: orange;
-}
+     -->    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
 
-.forward,
-.backward {
-    background-color: rgb(86, 198, 236);
-}
-
-.right {
-    grid-area: r;
-}
-
-.left {
-    grid-area: l;
-
-}
-
-
-.forward {
-    grid-area: f;
-}
-
-.backward {
-    grid-area: b;
-}
-
-div{
-    border-radius: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-
-}
-
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    grid-template-areas: '. f .' 
-                         'l b r'
-                         '. . .';
-    grid-gap: 10px;
-    height: 100vh;
-}
-
-.settings-icon {
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-    
-}
-.settings-icon:hover{
-    transform: rotate(45deg);
-}
-
-.speed-selector {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border: 1px solid black;
-    text-align: center;
-}
-
-.speed-selector label,
-.speed-selector button {
-    display: block;
-    margin: 10px auto; 
-    width: 80%; 
-    height: 70px; 
-    font-size: 20px;
-}
-
-.color-selector {
-    display: none; /* Initially hidden, can be shown like the speed selector */
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border: 1px solid black;
-    text-align: center;
-}
-
-.color-selector label,
-.color-selector input,
-.color-selector button {
-    display: block;
-    margin: 10px auto;
-    width: 80%;
-}
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative; 
+        }
 
 
-</style>
+        .right {
+            grid-area: r;
+        }
 
+        .left {
+            grid-area: l;
+
+        }
+
+
+        .forward {
+            grid-area: f;
+            margin-top: 10px;
+        }
+
+        .backward {
+            grid-area: b;
+        }
+
+        
+        .grid-container {
+            
+            width: 80%;
+            height: 80vh;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            grid-template-areas: '. f .' 
+                                'l b r' 
+                                '. . .';
+            grid-gap: 10px;
+        }
+
+        .clickable-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .clickable-area:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .settings-icons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+        }
+
+        .settings-icon {
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .settings-icon:hover {
+            transform: rotate(45deg);
+        }
+
+        .settings-panel {
+            display: none;
+            position: absolute;
+            top: 15%;
+            left: 80%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .settings-panel label,
+        .settings-panel button {
+            display: block;
+            margin: 10px auto;
+            width: 80%;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+    </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -150,7 +176,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const rightArea = document.querySelector('.right');
     const forwardArea = document.querySelector('.forward');
     const backwardArea = document.querySelector('.backward');
-    const settingsIcon = document.getElementById('settingsIcon');
+    const settingsIconSpeed = document.getElementById('settingsIconSpeed');
+    const settingsIconColor = document.getElementById('settingsIconColor');
     const speedSelector = document.getElementById('speedSelector');
     const confirmSpeedBtn = document.getElementById('confirmSpeed');
     const speedSelect = document.getElementById('speed');
@@ -158,38 +185,112 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmColorBtn = document.getElementById('confirmColor');
     const colorInput = document.getElementById('color');
 
-    settingsIcon.addEventListener('click', function () {
+    settingsIconSpeed.addEventListener('click', function () {
+
         speedSelector.style.display = 'block';
+
+    });
+
+    settingsIconColor.addEventListener('click', function () {
+
+        colorSelector.style.display = 'block';
+
     });
 
     confirmSpeedBtn.addEventListener('click', function () {
-        const selectedSpeed = speedSelect.value;
+        let selectedSpeed = speedSelect.value;
         console.log('Selected Speed:', selectedSpeed);
         speedSelector.style.display = 'none';
     });
 
-    function handleMouseOver(direction) {
 
-        console.log('Mouse Over!');
+    let pressedKeys = new Set();
+    let keyCount = 0;
 
+    document.addEventListener('keydown', function(event) {
+        
+        const key = event.key.toLowerCase(); // Um Groß- und Kleinschreibung zu berücksichtigen
+
+        pressedKeys[key] = true;
+        keyCount++;
+        
+
+
+        switch(key) {
+            case 'w':
+                handleMouseOver(0); // Vorwärts
+                break;
+            case 'a':
+                handleMouseOver(3); // Links
+                break;
+            case 's':
+                handleMouseOver(2); // Rückwärts
+                break;
+            case 'd':
+                handleMouseOver(1); // Rechts
+                break;
+            default:
+                break;
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        const key = event.key.toLowerCase(); // Um Groß- und Kleinschreibung zu berücksichtigen
+        delete pressedKeys[key];
+        keyCount--;
+
+        switch(key) {
+            case 'w':
+            case 'a':
+            case 's':
+            case 'd':
+                handleMouseOut(); // Wenn eine WASD-Taste losgelassen wird, soll der Mbot stoppen
+                break;
+            default:
+                break;
+        }
+    });
+
+    
+
+
+    // Handle color confirmation
+    confirmColorBtn.addEventListener('click', function () {
+        let selectedColor = colorInput.value;
+        console.log('Selected Color:', selectedColor);
+        colorSelector.style.display = 'none';
+
+        selectedColor = selectedColor.replace('#', '');
+
+        const r = parseInt(selectedColor.slice(0, 2), 16);
+        const g = parseInt(selectedColor.slice(2, 4), 16);
+        const b = parseInt(selectedColor.slice(4, 6), 16);
+        
+        rgb = r+":"+g+":"+b;
+        
 
         const command = {
-            direction: direction
+            typ: '8',
+            command: rgb
         };
+        
+        
+        sendColor(command);
+    });
 
-        sendMovement(command);
-
+    
+    function sendColor(command) {
+        
+        fetchCommand('/sendColor', command);
     }
+    
 
-    function handleMouseOut() {
-        console.log('Mouse Out!');
+    
 
-        const command = {
-            direction: -1
-        };
-
-
-        fetch('/sendMovement', {
+    function fetchCommand(route,command)
+    {
+        
+        fetch(route, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -208,23 +309,91 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => {
             console.error('Error:', error);
         });
+    }
+
+
+    
+
+    function handleMouseOver(direction) {
+
+        console.log('Mouse Over!');
+
+        if(pressedKeys.size >= 2)
+        {
+            direction = handleKeyDiagonal();
+        }
+
+        const command = {
+            typ: direction,
+            command: direction
+        };
+        
+
+        sendMovement(command);
 
     }
 
-    settingsIcon.addEventListener('click', function () {
-        colorSelector.style.display = 'block';
-    });
+    function handleMouseOut() {
 
-    // Handle color confirmation
-    confirmColorBtn.addEventListener('click', function () {
-        const selectedColor = colorInput.value;
-        console.log('Selected Color:', selectedColor);
-        colorSelector.style.display = 'none';
-        applyColor(selectedColor);
-    });
+        console.log('Mouse Out!');
 
-    function applyColor(color) {
-        console.log(color);
+        
+        const command = {
+            typ: -1,
+            command: -1
+        };
+
+
+        sendMovement(command);
+    }
+    
+
+    function handleKeyDiagonal()
+    {
+            
+        if (pressedKeys['w']) {
+
+            if (pressedKeys['a']) {
+                return 9;
+            }
+            else if (pressedKeys['d']) {
+                return 10;
+            }
+        }
+
+        else if (pressedKeys['s']) {
+
+            if (pressedKeys['a']) {
+                return 11;
+            }
+
+            else if (pressedKeys['d']) {
+
+                return 12;
+            }
+        }
+
+        if(pressedKeys['d'])
+        {
+            if (pressedKeys['w']) {
+                return 13;
+            }
+
+            if (pressedKeys['s']) {
+                return 14;
+            }
+        }
+
+        if(pressedKeys['a'])
+        {
+            if (pressedKeys['w']) {
+                return 15;
+            }
+            if (pressedKeys['s']) {
+                return 16;
+            }
+        }
+
     }
 
 
@@ -258,69 +427,50 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-
-
     
+
+
     function sendMovement(command) {
 
-        
-        fetch('/sendMovement', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(command)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Server response:', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
 
+        fetchCommand('/sendMovement',command)
 
+   
     }
-
+    
 
     confirmSpeedBtn.addEventListener('click', function () {
-        const selectedSpeed = speedSelect.value;
+
+        let selectedSpeed = speedSelect.value;
         console.log('Selected Speed:', selectedSpeed);
         speedSelector.style.display = 'none';
 
-        sendSpeed(selectedSpeed);
-});
-
-    function sendSpeed(speed) {
+        if(selectedSpeed == "medium")
+        {
+            selectedSpeed = '6';
+        }
+        else if(selectedSpeed == 'slow')
+        {
+            selectedSpeed = '5';
+        }
+        else if(selectedSpeed == 'fast')
+        {
+            selectedSpeed = '7';
+        }
+        
 
         const command = {
-            speed: speed
+            command: selectedSpeed,
+            typ: selectedSpeed
         };
+        
+        sendSpeed(command);
+});
 
-        fetch('/speed', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(command)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Server response:', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    function sendSpeed(command) {
+        
+        fetchCommand('/sendSpeed', command);
+        
     }
     
 });
