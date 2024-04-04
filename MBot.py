@@ -5,96 +5,292 @@ import ujson
 import usocket
 import machine
 import ussl as ssl
+import mbot2
+import event
+import os
+import _thread
 
-# Set blue LED
-cyberpi.led.on(0, 0, 255)
+#import RPi.GPIO as GPIO
 
-# Connect to the Wi-Fi network
-cyberpi.network.config_sta("htljoh-public", "joh12345")
 
-# Set blue LED during the connection setup
+
+
+cyberpi.console.println("Value: ")
+
+angleValue = cyberpi.angle_sensor
+rgbValue = cyberpi.dual_rgb_sensor
+ultrasonicValue = cyberpi.ultrasonic
+flameValue = cyberpi.flame_sensor
+tempValue = cyberpi.temp_sensor
+soundValue = cyberpi.sound_sensor
+ultrasonicValue2 = cyberpi.ultrasonic2
+lightValue = cyberpi.light_sensor
+magneticValue = cyberpi.magnetic_sensor
+soilValue = cyberpi.soil_sensor
+rangingValue = cyberpi.ranging_sensor
+
+shake = cyberpi.get_shakeval
+
+startUpCounter = cyberpi.timer
+
+
+
+
+
+
+
+
+#time.sleep(100)
+
+def moveForwardDivs():
+    cyberpi.mbot2.EM_stop(port = "all")
+    
+    if speed > 90:
+        cyberpi.mbot2.drive_power(50,-50)
+        time.sleep(0.5)
+        
+    cyberpi.mbot2.drive_power(speed,-speed)
+    
+    
+def moveBackwards():
+    cyberpi.mbot2.EM_stop(port = "all")
+    cyberpi.mbot2.drive_power(-speed,speed)
+
+def moveForwardW():
+    cyberpi.mbot2.drive_power(speed,-speed)
+
+
+        
+    
+
+
+
+
+#1
+"""
+time.sleep(5)
+cyberpi.mbot2.drive_power(100,100)
+time.sleep(0.5)
+cyberpi.mbot2.EM_stop(port = "all")
+"""
+
+#1/2
+"""
+time.sleep(5)
+cyberpi.mbot2.drive_power(100,100)
+time.sleep(0.27)
+cyberpi.mbot2.EM_stop(port = "all")
+"""
+
+"""
+time.sleep(5)
+cyberpi.mbot2.drive_power(100,100)
+time.sleep(0.1)
+cyberpi.mbot2.EM_stop(port = "all")
+"""
+
+    
+
+
+    
+
+    
+    
+
+    
+# Blue
 cyberpi.led.on(0, 0, 255)
 
 # Check if connected to the Wi-Fi network
 while True:
+
+    # Connect to Wi-Fi
+    cyberpi.network.config_sta("htljoh-public", "joh12345")
+    
     if not cyberpi.network.is_connect():
-        cyberpi.led.on(255, 0, 0)  # Red LED if not connected
+        cyberpi.led.on(255, 0, 0)  # Red
         time.sleep(1)
     else:
-        cyberpi.led.on(0, 255, 0)  # Green LED if connected
+        cyberpi.led.on(0, 255, 0)  # Green
         sockaddr = cyberpi.network.get_ip()
         cyberpi.console.println("IP:")
         cyberpi.console.println(sockaddr)
-        cyberpi.display.clear()
+        
+        
+        """cyberpi.display.clear()"""
         break
-
-# Set blue LED
-cyberpi.led.on(0, 0, 255)
-
+    
+"""
 cyberpi.console.println("Connection established")
+"""
 
-# Broadcast-Test
-udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-udp.bind(('', 1234))
-udp.setblocking(False)
-
-
-while True:
-    try:
-        data, addr = udp.recvfrom(1024)
-        if data == b'MBot2 Discovery':
-            print('Broadcast request received and answered')
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s = ssl.wrap_socket(s, server_side=False, cert_reqs=ssl.CERT_NONE)
-            s.connect((addr, 3500))
-
-            s.send(b'D3')
-            time.sleep(1)
-            data = s.recv(1024)
-            s.close()
-            break
-    except OSError:
-        pass
-
-    print("Waiting for broadcast request...")
-    time.sleep(0.1)
-
-udp.close()
-#
-
-# Get the IP address, subnet mask, and gateway
 subnet = cyberpi.network.get_subnet_mark()
 gateway = cyberpi.network.get_gateway()
 sockaddr = cyberpi.network.get_ip()
 
-# Create a UDP socket and bind it to the IP address and port 3500
-s = usocket.socket(usocket.AF_INET, usocket.SOCK_DGRAM)
-s.bind((sockaddr, 3500))
 
-# Example usage of the socket (not provided in the original code)
-# You can use the socket 's' for sending and receiving data over UDP
-# For example, sending data to IP address 10.10.10.10 on port 3500:
-# s.sendto(b"Hello, server!", ("10.10.10.10", 3500))
+port=12345
+speed = 100
 
-s.sendto(b"Hello, server!", (sockaddr, 3500))
+# UDP-Socket erstellen
+udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+udp_socket.bind(('', port))  # Binden an alle verfügbaren Schnittstellen
 
-# Receive data from the server
+cyberpi.console.println('Listening (UDP)')
+
+
+# Find-Mbot
 while True:
-    try:
-        data, addr = s.recvfrom(1024)  # Receive data with a maximum size of 1024 bytes
-        received_data = ujson.loads(data)  # Decode the received JSON data
-        cyberpi.console.println("Received data from the server:")
-        cyberpi.console.println(received_data)
-        time.sleep(5)
-        # Here you can further process the received data
-        # For example: Perform actions based on the received data
-    except OSError as e:
-        # OSError is raised if no data has been received yet
-        cyberpi.console.println("No data received yet")
-        pass
-    except Exception as e:
-        # All other exceptions are handled here
-        cyberpi.console.println("Error receiving data:", str(e))
-        
+    data, addr = udp_socket.recvfrom(1024)  # Nachricht empfangen
     
+
+    cyberpi.console.println('Nachricht erhalten: {} : {}' .format(addr, data))
+    
+    # Hier kannst du auf die Nachricht reagieren und eine Antwort senden
+    if data.decode() == "MBotDiscovery":
+        response_message = "MBotDiscovered"
+        # addr[0] = Server IP
+        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+        cyberpi.console.println('Serverip: {} ' .format(addr[0]))
+    elif data.decode() == "Connected to Server":
+        cyberpi.console.println('Connected to server!')
+        break
+    
+
+
+
+    # Receive Server-Message
+def receiveServer():
+        while True:
+            
+            global speed
+
+            
+            data, addr = udp_socket.recvfrom(1024)  # Nachricht empfangen
+            commandTyp, *_, command = data.decode().partition(';')
+            
+            # cyberpi.console.println(commandTyp)
+            #cyberpi.console.println('Nachricht erhalten: {} : {}' .format(addr, data))
+            
+            #Receive:
+            # move
+            # 0: forward; 1: right; 2: backwards; 3:left; -1: stop
+        
+            if commandTyp == "0":
+                response_message = "MoveForward"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
+                moveForwardW()
+                
+            elif commandTyp == "1":
+                response_message = "MoveRight"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
+                
+                cyberpi.mbot2.drive_power(speed, speed)
+                #time.sleep(0.27)
+                #cyberpi.mbot2.EM_stop(port = "all")
+                
+                
+            elif commandTyp == "2":
+                response_message = "MoveBackwards"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
+                moveBackwards()
+                
+                
+        
+            elif commandTyp == "3":
+                response_message = "MoveLeft"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
+                
+                cyberpi.mbot2.drive_power(-speed, -speed)
+                #time.sleep(0.27)
+                #cyberpi.mbot2.EM_stop(port = "all")
+                
+                
+                
+            elif commandTyp == "-1":
+                response_message = "Stop"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
+                
+                cyberpi.mbot2.EM_stop(port = "all")
+                
+        
+        
+            # speed
+            # 5: slow; 6: medium; 7: fast
+            
+            elif commandTyp == "5":
+                response_message = "slow"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('slow')
+                speed = 33
+        
+            elif commandTyp == "6":
+                response_message = "medium"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('medium')
+                speed = 67
+                
+            elif commandTyp == "7":
+                response_message = "fast"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('fast')
+                speed = 100
+                
+            # color: 8
+            elif commandTyp == "8":
+                response_message = "colorChanged"
+                udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                #cyberpi.console.println('colorChanged')
+                
+                rgb_components = command.split(':')
+                
+                r = int(rgb_components[0])
+                g = int(rgb_components[1])
+                b = int(rgb_components[2])
+                
+                cyberpi.led.on(r,g,b)
+                
+            # direction: oben rechts
+            elif commandTyp == "9":
+                cyberpi.mbot2.drive_power(speed,-speed/2)
+        
+            elif commandTyp == "20":
+                
+                angleValue = cyberpi.angle_sensor
+                #cyberpi.console.println("Ultrasonic sensor value: ", angleValue)
+                    
+
+
+def sendServer():
+    
+    #
+    startUpTimer = "StartUpTimer:" + startUpCounter.get() + ";"
+    udp_socket.sendto(startUpTimer.encode(), (addr[0],port))  # Antwort senden  
+
+
+_thread.start_new_thread(receiveServer,())
+
+sendServer()
+
+
+
+    
+
+    #Send:
+    # Sensordaten
+
+    
+
+    
+"""
+cyberpi.mbot2.drive_power(100,0)
+time.sleep(2)
+cpi.mbot2.EM_stop(port = "all")
+
+"""
+        
