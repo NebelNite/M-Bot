@@ -18,7 +18,7 @@ const internal = require('stream');
 
 const port = 3001;
 
-let mBotIp, mBotPort = 12345;
+let mBotIp = null, mBotPort = 12345;
 let mbotData = undefined;
 
 const client = dgram.createSocket('udp4');
@@ -335,7 +335,6 @@ function listenForUdpMessages() {
         // Send a response message
         const responseMessage = 'Connected to Server';
         server.send(responseMessage, remote.port, remote.address);
-
         
         //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
 
@@ -346,6 +345,7 @@ function listenForUdpMessages() {
     // Close the server when the function is no longer needed
     return () => {
       server.close();
+      receiveMBotData();
     };
   }
   
@@ -404,37 +404,31 @@ server.listen(port, ip, () => {
 
 
 
+function receiveMBotData()
+{
     // Create a UDP server
-    const server = dgram.createSocket('udp4');
-    
+    const serv = dgram.createSocket('udp4');
+
     // Bind the server to a port and IP address
-    server.bind(mBotPort, '0.0.0.0');
-    
-    console.log("Listening");
-
-    // Handle incoming messages
-    server.on('message', (message, remote) => {
-
-        console.log(message.toString());
-
-      if (message.toString() === 'MBotDiscovered') {
-        console.log('Received message:', message);
-        console.log('From address:', remote);
-
-        mbotData = remote;
-
-        // Send a response message
-        const responseMessage = 'Connected to Server';
-        server.send(responseMessage, remote.port, remote.address);
-
+    if(mBotIp != null)
+    {
+        server.bind(mBotPort, mBotIp);
         
-        //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+        console.log("Listening/MBotData");
 
+        // Handle incoming messages
+        server.on('message', (message, remote) => {
 
-      }
-    });
-  
-    // Close the server when the function is no longer needed
-    return () => {
-      server.close();
-    };
+            console.log(message.toString());
+            message = message.toString();
+            
+
+            // Send a response message
+            const responseMessage = 'Response';
+            server.send(responseMessage, remote.port, remote.address);
+
+            
+            //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+        }
+    )};   
+}
