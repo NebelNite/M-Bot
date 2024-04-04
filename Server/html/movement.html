@@ -47,7 +47,6 @@
             <p>&copy; 2024 Remote Control. All rights reserved.</p>
         </footer>
 
-        
     </body>
     <!-- 
     <script src="../js/movement.js"></script>
@@ -205,6 +204,54 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
+    let pressedKeys = new Set();
+    let keyCount = 0;
+
+    document.addEventListener('keydown', function(event) {
+        
+        const key = event.key.toLowerCase(); // Um Groß- und Kleinschreibung zu berücksichtigen
+
+        pressedKeys[key] = true;
+        keyCount++;
+        
+
+
+        switch(key) {
+            case 'w':
+                handleMouseOver(0); // Vorwärts
+                break;
+            case 'a':
+                handleMouseOver(3); // Links
+                break;
+            case 's':
+                handleMouseOver(2); // Rückwärts
+                break;
+            case 'd':
+                handleMouseOver(1); // Rechts
+                break;
+            default:
+                break;
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        const key = event.key.toLowerCase(); // Um Groß- und Kleinschreibung zu berücksichtigen
+        delete pressedKeys[key];
+        keyCount--;
+
+        switch(key) {
+            case 'w':
+            case 'a':
+            case 's':
+            case 'd':
+                handleMouseOut(); // Wenn eine WASD-Taste losgelassen wird, soll der Mbot stoppen
+                break;
+            default:
+                break;
+        }
+    });
+
+    
 
 
     // Handle color confirmation
@@ -271,7 +318,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         console.log('Mouse Over!');
 
-        
+        if(pressedKeys.size >= 2)
+        {
+            direction = handleKeyDiagonal();
+        }
+
         const command = {
             typ: direction,
             command: direction
@@ -296,6 +347,55 @@ document.addEventListener('DOMContentLoaded', function () {
         sendMovement(command);
     }
     
+
+    function handleKeyDiagonal()
+    {
+            
+        if (pressedKeys['w']) {
+
+            if (pressedKeys['a']) {
+                return 9;
+            }
+            else if (pressedKeys['d']) {
+                return 10;
+            }
+        }
+
+        else if (pressedKeys['s']) {
+
+            if (pressedKeys['a']) {
+                return 11;
+            }
+
+            else if (pressedKeys['d']) {
+
+                return 12;
+            }
+        }
+
+        if(pressedKeys['d'])
+        {
+            if (pressedKeys['w']) {
+                return 13;
+            }
+
+            if (pressedKeys['s']) {
+                return 14;
+            }
+        }
+
+        if(pressedKeys['a'])
+        {
+            if (pressedKeys['w']) {
+                return 15;
+            }
+            if (pressedKeys['s']) {
+                return 16;
+            }
+        }
+
+    }
+
 
 
 

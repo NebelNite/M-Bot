@@ -12,11 +12,14 @@ const os = require('os');
 const socketIo = require('socket.io');
 
 const udpBroadcast = require('udp-broadcast');
-
+const internal = require('stream');
 
 
 
 const port = 3001;
+
+let mBotIp, mBotPort = 12345;
+let mbotData = undefined;
 
 const client = dgram.createSocket('udp4');
 
@@ -58,8 +61,7 @@ let broadcastip = broadcastAddressParts.join(".");
 //const ip = '10.10.0.172';
 const fixPassword = process.env.PASSWORD_HASH;
 
-let mBotIp, mBotPort = 12345;
-let mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+//let mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
 
 
 const options = {
@@ -155,26 +157,26 @@ app.post('/sendColor', (req, res) => {
 function sendCommandToMbot(command) {
 
     command = command.typ + ';' + command.command;
-
     
-    if(mBotIp != undefined && mBotPort != undefined)
+    if(mbotData != undefined)
     {
         const client = dgram.createSocket('udp4');
         const buffer = Buffer.from(command.toString());
         
-        
-        client.send(buffer, 0, buffer.length, mBotIp.port, mBotIp.address, (error) => {
+
+        client.send(buffer, 0, buffer.length, mbotData.port, mbotData.address, (error) => {
             if (error) {
-                console.error(`Fehler beim Senden der Nachricht an ${mBotIp}:${mBotPort}:`, error);
+                console.error(`Fehler beim Senden der Nachricht an ${mbotData.address}:${mbotData.port}:`, error);
             } else {
-                console.log(`Nachricht erfolgreich an ${mBotIp.address}:${mBotPort.port} gesendet: ${command}`);
+                console.log(`Nachricht erfolgreich an ${mbotData.address}:${mbotData.port} gesendet: ${command}`);
             }
             client.close();
         });
     }
 }
 
-let subnets = '10.10.3';
+
+let subnets = '10.10.1';
 
 function requireLogin(req, res, next) {
     if (req.session && req.session.loggedIn) {
@@ -281,7 +283,7 @@ function sendMessageToDevices(devices, message) {
 
     devices.forEach(device => {
         const promise = new Promise((resolve, reject) => {
-            client.send(message, 0, message.length, mBotPort, device, (error) => {
+            client.send(message, 0, message.length, 12345, device, (error) => {
                 if (error) {
                     console.error(`Fehler beim Senden der Nachricht an ${device}:`, error);
                     reject(error);
@@ -308,11 +310,12 @@ function sendMessageToDevices(devices, message) {
 }
 
 
+
 function listenForUdpMessages() {
 
     // Create a UDP server
     const server = dgram.createSocket('udp4');
-
+    
     // Bind the server to a port and IP address
     server.bind(mBotPort, '0.0.0.0');
     
@@ -326,17 +329,15 @@ function listenForUdpMessages() {
       if (message.toString() === 'MBotDiscovered') {
         console.log('Received message:', message);
         console.log('From address:', remote);
-        
-        mBotIp = remote.address;
-        mBotPort = remote.port;
+
+        mbotData = remote;
 
         // Send a response message
         const responseMessage = 'Connected to Server';
         server.send(responseMessage, remote.port, remote.address);
 
         
-        mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
-
+        //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
 
 
       }
@@ -365,7 +366,7 @@ function listenForUdpMessages() {
         mBotIp = null;
         console.warn("Verbindung zum mBot verloren!");
       }
-  
+
       client.close();
     });
   }
@@ -400,3 +401,40 @@ server.listen(port, ip, () => {
     console.log(`Server läuft auf https://${ip}:${port}/movement`);
 });
 
+
+
+
+    // Create a UDP server
+    const server = dgram.createSocket('udp4');
+    
+    // Bind the server to a port and IP address
+    server.bind(mBotPort, '0.0.0.0');
+    
+    console.log("Listening");
+
+    // Handle incoming messages
+    server.on('message', (message, remote) => {
+
+        console.log(message.toString());
+
+      if (message.toString() === 'MBotDiscovered') {
+        console.log('Received message:', message);
+        console.log('From address:', remote);
+
+        mbotData = remote;
+
+        // Send a response message
+        const responseMessage = 'Connected to Server';
+        server.send(responseMessage, remote.port, remote.address);
+
+        
+        //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
+
+
+      }
+    });
+  
+    // Close the server when the function is no longer needed
+    return () => {
+      server.close();
+    };
