@@ -408,12 +408,11 @@ function receiveMBotData()
 {
     // Create a UDP server
     const serv = dgram.createSocket('udp4');
-
-    // Bind the server to a port and IP address
+    
+    
     if(mBotIp != null)
     {
         server.bind(mBotPort, mBotIp);
-        
         console.log("Listening/MBotData");
 
         // Handle incoming messages
@@ -422,10 +421,11 @@ function receiveMBotData()
             console.log(message.toString());
             message = message.toString();
             
+            
 
             // Send a response message
             const responseMessage = 'Response';
-            server.send(responseMessage, remote.port, remote.address);
+            server.send(responseMessage, mBotPort, mBotIp);
 
             
             //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
