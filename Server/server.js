@@ -421,8 +421,8 @@ function receiveMBotData()
             console.log(message.toString());
             message = message.toString();
             
-            
 
+            
             // Send a response message
             const responseMessage = 'Response';
             server.send(responseMessage, mBotPort, mBotIp);
