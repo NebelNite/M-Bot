@@ -105,6 +105,11 @@ app.get('/movement', requireLogin, (req, res) => {
     res.sendFile(__dirname + "/html/movement.html");
 });
 
+app.get('/sensorData', requireLogin, (req, res) => {
+    res.sendFile(__dirname + "/html/sensorData.html");
+});
+
+
 app.post('/movement', (req, res) => {
     if (req.session && req.session.loggedIn) {
         const command = req.body.direction; 
@@ -154,6 +159,8 @@ app.post('/sendColor', (req, res) => {
 
 
 
+
+
 function sendCommandToMbot(command) {
 
     command = command.typ + ';' + command.command;
@@ -177,6 +184,7 @@ function sendCommandToMbot(command) {
 
 
 let subnets = '10.10.1';
+
 
 function requireLogin(req, res, next) {
     if (req.session && req.session.loggedIn) {
@@ -395,7 +403,6 @@ function checkPassword(req, res, next) {
 app.post('/login', checkPassword);
 
 
-
 server.listen(port, ip, () => {
     
     console.log(`Server läuft auf https://${ip}:${port}/movement`);
@@ -420,13 +427,14 @@ function receiveMBotData()
 
             console.log(message.toString());
             message = message.toString();
-            
 
-            
-            // Send a response message
+
+            /*
             const responseMessage = 'Response';
             server.send(responseMessage, mBotPort, mBotIp);
+            */
 
+            
             
             //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
         }

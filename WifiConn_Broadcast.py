@@ -8,17 +8,60 @@ import ussl as ssl
 import mbot2
 import event
 import os
-import RPi.GPIO as GPIO
+import _thread
+
+#import RPi.GPIO as GPIO
 
 
 
-def moveForward():
+
+cyberpi.console.println("Value: ")
+
+angleValue = cyberpi.angle_sensor
+rgbValue = cyberpi.dual_rgb_sensor
+ultrasonicValue = cyberpi.ultrasonic
+flameValue = cyberpi.flame_sensor
+tempValue = cyberpi.temp_sensor
+soundValue = cyberpi.sound_sensor
+ultrasonicValue2 = cyberpi.ultrasonic2
+lightValue = cyberpi.light_sensor
+magneticValue = cyberpi.magnetic_sensor
+soilValue = cyberpi.soil_sensor
+rangingValue = cyberpi.ranging_sensor
+
+shake = cyberpi.get_shakeval
+
+startUpCounter = cyberpi.timer
+
+
+
+
+
+
+
+
+#time.sleep(100)
+
+def moveForwardDivs():
     cyberpi.mbot2.EM_stop(port = "all")
+    
+    if speed > 90:
+        cyberpi.mbot2.drive_power(50,-50)
+        time.sleep(0.5)
+        
     cyberpi.mbot2.drive_power(speed,-speed)
+    
     
 def moveBackwards():
     cyberpi.mbot2.EM_stop(port = "all")
     cyberpi.mbot2.drive_power(-speed,speed)
+
+def moveForwardW():
+    cyberpi.mbot2.drive_power(speed,-speed)
+
+
+        
+    
 
 
 
@@ -46,6 +89,12 @@ time.sleep(0.1)
 cyberpi.mbot2.EM_stop(port = "all")
 """
 
+    
+
+
+    
+
+    
     
 
     
@@ -94,6 +143,7 @@ cyberpi.console.println('Listening (UDP)')
 while True:
     data, addr = udp_socket.recvfrom(1024)  # Nachricht empfangen
     
+
     cyberpi.console.println('Nachricht erhalten: {} : {}' .format(addr, data))
     
     # Hier kannst du auf die Nachricht reagieren und eine Antwort senden
@@ -106,104 +156,139 @@ while True:
         cyberpi.console.println('Connected to server!')
         break
     
-# Receive Server-Message
-while True:
-    
-    data, addr = udp_socket.recvfrom(1024)  # Nachricht empfangen
-    
-    
-    commandTyp, *_, command = data.decode().partition(';')
-    
-    cyberpi.console.println(commandTyp)
-    
-    
-    #cyberpi.console.println('Nachricht erhalten: {} : {}' .format(addr, data))
-    
-    # move
-    # 0: forward; 1: right; 2: backwards; 3:left; -1: stop
-
-    if commandTyp == "0":
-        response_message = "MoveForward"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
-        moveForward()
-
-        
-    elif commandTyp == "1":
-        response_message = "MoveRight"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
-        cyberpi.mbot2.drive_power(speed, speed)
-        time.sleep(0.27)
-        cyberpi.mbot2.EM_stop(port = "all")
-        moveForward()
-        
-    elif commandTyp == "2":
-        response_message = "MoveBackwards"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
-        
-        moveBackwards()
-        
-
-    elif commandTyp == "3":
-        response_message = "MoveLeft"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
-        
-        cyberpi.mbot2.drive_power(-speed, -speed)
-        time.sleep(0.27)
-        cyberpi.mbot2.EM_stop(port = "all")
-        
-        
-    elif commandTyp == "-1":
-        response_message = "Stop"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        #cyberpi.console.println('Serverip: {} ' .format(addr[0]))
-        
-        cyberpi.mbot2.EM_stop(port = "all")
 
 
-    # speed
-    # 5: slow; 6: medium; 7: fast
-    
-    elif commandTyp == "5":
-        response_message = "slow"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        cyberpi.console.println('slow')
-        speed = 33
 
-    elif commandTyp == "6":
-        response_message = "medium"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        cyberpi.console.println('medium')
-        speed = 67
+def receiveServer():
+    while True:
         
-    elif commandTyp == "7":
-        response_message = "fast"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        cyberpi.console.println('fast')
-        speed = 100
+        cyberpi.console.println('In Receive-Server')
         
-    # color: 8
-    elif commandTyp == "8":
-        response_message = "colorChanged"
-        udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
-        cyberpi.console.println('colorChanged')
+        global speed
+
+            
+        data, addr = udp_socket.recvfrom(1024)  # Nachricht empfangen
+        commandTyp, *_, command = data.decode().partition(';')
+            
+            # cyberpi.console.println(commandTyp)
+            #cyberpi.console.println('Nachricht erhalten: {} : {}' .format(addr, data))
+            
+            #Receive:
+            # move
+            # 0: forward; 1: right; 2: backwards; 3:left; -1: stop
         
-        rgb_components = command.split(':')
+        if commandTyp == "0":
+            response_message = "MoveForward"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+            moveForwardW()
+                
+        elif commandTyp == "1":
+            response_message = "MoveRight"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                
+            cyberpi.mbot2.drive_power(speed, speed)
+                #time.sleep(0.27)
+                #cyberpi.mbot2.EM_stop(port = "all")
+                
+                
+        elif commandTyp == "2":
+            response_message = "MoveBackwards"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+            moveBackwards()
+                
+                
         
-        r = int(rgb_components[0])
-        g = int(rgb_components[1])
-        b = int(rgb_components[2])
+        elif commandTyp == "3":
+            response_message = "MoveLeft"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                
+            cyberpi.mbot2.drive_power(-speed, -speed)
+            #time.sleep(0.27)
+            #cyberpi.mbot2.EM_stop(port = "all")
+                
+                
+                
+        elif commandTyp == "-1":
+            response_message = "Stop"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+                
+            cyberpi.mbot2.EM_stop(port = "all")
+                
         
-        cyberpi.led.on(r,g,b)
         
-    # shutdown: 9
-    elif commandTyp == "9":
-        GPIO.setmode(GPIO.BCM)  
-        GPIO.setup(3, GPIO.IN, pull_up_down = GPIO.PUD_UP)  
-        os.system("sudo shutdown -h now") 
+            # speed
+            # 5: slow; 6: medium; 7: fast
+            
+        elif commandTyp == "5":
+            response_message = "slow"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+            #cyberpi.console.println('slow')
+            speed = 33
+        
+        elif commandTyp == "6":
+            response_message = "medium"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+            #cyberpi.console.println('medium')
+            speed = 67
+                
+        elif commandTyp == "7":
+            response_message = "fast"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+            #cyberpi.console.println('fast')
+            speed = 100
+                
+            # color: 8
+        elif commandTyp == "8":
+            response_message = "colorChanged"
+            udp_socket.sendto(response_message.encode(), (addr[0],port))  # Antwort senden  
+            #cyberpi.console.println('colorChanged')
+                
+            rgb_components = command.split(':')
+                
+            r = int(rgb_components[0])
+            g = int(rgb_components[1])
+            b = int(rgb_components[2])
+                
+            cyberpi.led.on(r,g,b)
+                
+            # direction: oben rechts
+        elif commandTyp == "9":
+            cyberpi.mbot2.drive_power(speed,-speed/2)
+        
+        elif commandTyp == "20":
+                
+            angleValue = cyberpi.angle_sensor
+            #cyberpi.console.println("Ultrasonic sensor value: ", angleValue)
+                    
+
+
+def sendServer():
+    
+        while True:
+            #
+            #startUpTimer = "StartUpTimer:" + startUpCounter.get() + ";"
+            startUpTimer = "StartUpTimer:" + ";"
+            udp_socket.sendto(startUpTimer.encode(), (addr[0],port))  # Antwort senden  
+            
+
+    
+
+receiveServer()
+
+
+
+#sendServer()
+
+
+
+#  _thread.start_new_thread(receiveServer,())
+
+    
+
+    #Send:
+    # Sensordaten
+
+    
 
     
 """

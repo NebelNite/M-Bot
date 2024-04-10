@@ -7,10 +7,10 @@
         <link type="text/css" href="/css/movement.css">
     </head>
 
-
+    
     <body>
         <header>
-            <h1>MBot</h1>
+            <h1>MBot-Movement</h1>
         </header>
     
         <main>
@@ -26,7 +26,8 @@
                 <div class="settings-icon" id="settingsIconColor">🔧</div>
             </div>
 
-            <div class="toggleSwi">
+            
+            <div class="Movement On/Off">
                 <h2>Toggle Switch</h2>
 
                 <label class="switch">
@@ -34,8 +35,10 @@
                 <span class="slider round"></span>
                 </label>
             </div>
+
+            <button id="openWindowBtn">Öffne Fenster</button>
+
             
-    
             <div class="settings-panel" id="speedSelector">
                 <label for="speed">Geschwindigkeit:</label>
                 <select name="speed" id="speed">
@@ -256,6 +259,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const colorInput = document.getElementById('color');
     const toggleSwitch = document.getElementById('toggleSwitch');
 
+    const openWindowBtn = document.getElementById('openWindowBtn');
+    
     settingsIconSpeed.addEventListener('click', function () {
 
         speedSelector.style.display = 'block';
@@ -497,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    
+
 
 
     function sendMovement(command) {
@@ -505,8 +510,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if(toggleSwitch.checked){
             fetchCommand('/sendMovement',command)
         }
-   
     }
+
+
     
 
     confirmSpeedBtn.addEventListener('click', function () {
@@ -537,10 +543,29 @@ document.addEventListener('DOMContentLoaded', function () {
         sendSpeed(command);
 });
 
+
+
+    document.addEventListener('keydown', function(event) {
+
+            if (event.key == '3') {
+                var toggleSwitch = document.getElementById('toggleSwitch');
+                if (toggleSwitch) {
+                    toggleSwitch.checked = !toggleSwitch.checked;
+                }
+            }
+        });
+        
+        
+        openWindowBtn.addEventListener('click', function () {
+            window.location.href = "sensorData";
+        });
+
+
+
+
     function sendSpeed(command) {
         
-        fetchCommand('/sendSpeed', command);
-        
+        fetchCommand('/sendSpeed', command);   
     }
     
 });
