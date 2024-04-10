@@ -9,8 +9,8 @@ mongo_uri ="mongodb+srv://tomto:12345@cluster0.lzvmtde.mongodb.net/?retryWrites=
 client = MongoClient(mongo_uri)
 
 # Connect to the database and collection. Adjust 'yourDatabase' and 'yourCollection' accordingly.
-db = client['yourDatabase']
-collection = db['yourCollection']
+db = client['Cluster0']
+collection = db['MBotSensoren']
 
 @app.route('/store', methods=['POST'])
 def store_data():
