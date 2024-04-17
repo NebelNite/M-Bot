@@ -49,7 +49,6 @@ const SUBNET_MASK = "255.255.255.0";
 const ipv4AddressParts = ip.split(".").map(Number);
 const subnetMaskParts = SUBNET_MASK.split(".").map(Number);
 
-// Berechnung der Broadcast-Adresse
 const broadcastAddressParts = ipv4AddressParts.map((part, i) => {
   return part | (255 - subnetMaskParts[i]);
 });
@@ -89,6 +88,12 @@ const server = https.createServer(options, app);
 const io = socketIo(server);
 
 
+
+app.get('/sensorData', (req, res) => {
+    res.redirect('/html/sensorData.html');
+  });
+
+
 app.get('*/css/.css', function (req, res, next) {
     res.set('Content-Type', 'text/css');
     next();
@@ -100,14 +105,31 @@ app.get('*js/.js', function (req, res, next) {
 });
 
 
+app.get('/requestSensorData', (req, res) => {
+
+
+    command = req.body;
+    
+    sendCommandToMbot(command);
+
+
+    res.json(data);
+});
+
 
 app.get('/movement', requireLogin, (req, res) => {
     res.sendFile(__dirname + "/html/movement.html");
 });
 
-app.get('/sensorData', requireLogin, (req, res) => {
-    res.sendFile(__dirname + "/html/sensorData.html");
-});
+
+app.get('/html/sensorData.html', (req, res) => {
+    res.sendFile(__dirname + '/html/sensorData.html');
+  });
+  
+
+  
+  
+
 
 
 app.post('/movement', (req, res) => {
@@ -187,6 +209,7 @@ let subnets = '10.10.1';
 
 
 function requireLogin(req, res, next) {
+
     if (req.session && req.session.loggedIn) {
         
         const subnetsToScan = [subnets];
@@ -416,7 +439,6 @@ function receiveMBotData()
     // Create a UDP server
     const serv = dgram.createSocket('udp4');
     
-    
     if(mBotIp != null)
     {
         server.bind(mBotPort, mBotIp);
@@ -427,6 +449,16 @@ function receiveMBotData()
 
             console.log(message.toString());
             message = message.toString();
+
+            messageParts = message.split(';');
+            
+            for (let m of messageParts) 
+            {
+                description= m[0];
+                value = m[1];
+
+
+            }
 
 
             /*

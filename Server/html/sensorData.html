@@ -8,13 +8,13 @@
 </head>
 
 <body>
-<header>
-    <h1>MBot-Data</h1>
-</header>
+    <header>
+        <h1>MBot-Data</h1>
+    </header>
 
 <main>
 
-
+    <div id="data"></div>
 
 
 </main>
@@ -23,7 +23,7 @@
     <p>&copy; 2024 Remote Control. All rights reserved.</p>
 </footer>
 
-<!-- Externe JavaScript-Datei -->
+
 <!--
 <script src="../js/movement.js"></script>
 -->
@@ -208,4 +208,36 @@
 </style>
 
 </body>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+      
+      const command = {
+            typ: 12,
+            command: 12
+        };
+
+    fetch('/requestSensorData', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(command)
+    })
+    .then(response => response.json())
+    .then(data => {
+      const dataDiv = document.getElementById('data');
+      dataDiv.textContent = JSON.stringify(data);
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+
+
+    });
+
+
+  </script>
 </html>
