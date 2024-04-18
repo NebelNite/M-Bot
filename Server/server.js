@@ -10,7 +10,7 @@ const dgram = require('dgram');
 const ping = require('ping');
 const os = require('os');
 const socketIo = require('socket.io');
-
+const { MongoClient } = require('mongodb')
 const udpBroadcast = require('udp-broadcast');
 const internal = require('stream');
 
@@ -22,7 +22,6 @@ let mBotIp = null, mBotPort = 12345;
 let mbotData = undefined;
 
 const client = dgram.createSocket('udp4');
-
 
 
 let ipv4Addresses = [];
@@ -88,10 +87,81 @@ const server = https.createServer(options, app);
 const io = socketIo(server);
 
 
+/*
+// MongoDB connection string.
+const mongoUri = 'mongodb+srv://tomto:12345@cluster0.lzvmtde.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const clientMongoDB = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+
+// Connect to MongoDB
+async function connectMongo() {
+  try {
+    await clientMongoDB.connect();
+    console.log('Connected successfully to MongoDB');
+  } catch (e) {
+    console.error(`Connection to MongoDB failed: ${e}`);
+  }
+}
+connectMongo();
+
+
+const db = clientMongoDB.db('Cluster0');
+const collection = db.collection('MBotSensoren');
+
+// POST endpoint to store data
+app.post('/store', async (req, res) => {
+  const data = req.body;
+  if (!data) {
+    return res.status(400).json({ error: 'Missing data' });
+  }
+
+  try {
+    await collection.insertOne(data);
+    res.status(200).json({ message: 'Data stored successfully' });
+  } catch (e) {
+    res.status(500).json({ error: e.toString() });
+  }
+});
+
+// GET endpoint to fetch data
+app.get('/fetch', async (req, res) => {
+    
+  const amount = parseInt(req.query.amount);
+
+  try {
+    const queryOptions = { sort: { timestamp: -1 } };
+    let dataCursor;
+    if (!isNaN(amount) && amount > 0) {
+      queryOptions.limit = amount;
+    }
+
+    dataCursor = collection.find({}, queryOptions);
+
+    const data_list = await dataCursor.toArray();
+    data_list.forEach(data => {
+      if (data._id) data._id = data._id.toString(); 
+    });
+
+    res.status(200).json(data_list);
+  } catch (e) {
+    res.status(500).json({ error: e.toString() });
+  }
+});
+
+
+
+*/
+
+
+
+
+
+
+
 
 app.get('/sensorData', (req, res) => {
     res.redirect('/html/sensorData.html');
-  });
+});
 
 
 app.get('*/css/.css', function (req, res, next) {
@@ -105,15 +175,18 @@ app.get('*js/.js', function (req, res, next) {
 });
 
 
+let sensorData = undefined
+
 app.get('/requestSensorData', (req, res) => {
 
-
+  /*
     command = req.body;
-    
     sendCommandToMbot(command);
-
-
+    
     res.json(data);
+    */
+
+    res.json();
 });
 
 
@@ -178,6 +251,9 @@ app.post('/sendColor', (req, res) => {
     res.end();
     
 });
+
+
+
 
 
 
@@ -351,7 +427,7 @@ function listenForUdpMessages() {
     server.bind(mBotPort, '0.0.0.0');
     
     console.log("Listening");
-
+    
     // Handle incoming messages
     server.on('message', (message, remote) => {
 
@@ -406,7 +482,10 @@ app.get('/login', (req, res) => {
     res.sendFile(__dirname + "/html/login.html");
 });
 
+
+
 function checkPassword(req, res, next) {
+  
     const enteredPassword = req.body.password;
     if (!enteredPassword) {
         return res.status(400).send('Passwort fehlt');
@@ -422,6 +501,7 @@ function checkPassword(req, res, next) {
         }
     });
 }
+
 
 app.post('/login', checkPassword);
 
@@ -439,27 +519,34 @@ function receiveMBotData()
     // Create a UDP server
     const serv = dgram.createSocket('udp4');
     
+    console.log("In: receiveMBotData");
+
     if(mBotIp != null)
     {
         server.bind(mBotPort, mBotIp);
+        
         console.log("Listening/MBotData");
 
         // Handle incoming messages
         server.on('message', (message, remote) => {
-
             console.log(message.toString());
+            sensorData = message.toString();
+
+            /*
             message = message.toString();
-
-            messageParts = message.split(';');
-            
-            for (let m of messageParts) 
+            sensors = message.split(';');
+            for (let m of sensors) 
             {
-                description= m[0];
-                value = m[1];
+              pair = m.split(':');
 
-
+              description= pair[0];
+              value = pair[1];
             }
+            */
+            
 
+
+            
 
             /*
             const responseMessage = 'Response';

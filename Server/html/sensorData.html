@@ -211,30 +211,36 @@
 
 <script>
 
-    document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
 
-      
-      const command = {
-            typ: 12,
-            command: 12
-        };
+  let dataDiv = document.getElementById('dataDiv');
 
-    fetch('/requestSensorData', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(command)
-    })
+  // Send a request to the server as soon as the page is loaded
+  fetch('/requestSensorData')
     .then(response => response.json())
     .then(data => {
-      const dataDiv = document.getElementById('data');
-      dataDiv.textContent = JSON.stringify(data);
+      //dataDiv.textContent = JSON.stringify(data);
+      // data: Sensordaten
+      
+      sensors = data.split(';');
+
+      for (let m of sensors) 
+      {
+        pair = m.split(':');
+        description= pair[0];
+        value = pair[1];
+      }
+
+
     })
     .catch(error => {
       console.error('Error fetching data:', error);
     });
 
+    
+
+
+    
 
     });
 
