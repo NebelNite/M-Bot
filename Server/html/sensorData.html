@@ -59,18 +59,7 @@ google.charts.load('current', {'packages':['corechart']});
 // Set a callback to run when the Google Visualization API is loaded.
 google.charts.setOnLoadCallback(fetchAndDisplayData);
 
-/*
-  // Send a request to the server as soon as the page is loaded
-  fetch('/requestSensorData')
-    .then(response => response.json())
-    .then(data => {
-      //dataDiv.textContent = JSON.stringify(data);
-      // data: Sensordaten
-
-      sensors = data.split(';');
-      */
-
-      function drawChart(dataArray) {
+function drawChart(dataArray) {
     // Create the data table.
     var data = new google.visualization.DataTable();
     data.addColumn('string', 'X'); // Modify according to your data keys
@@ -91,7 +80,6 @@ google.charts.setOnLoadCallback(fetchAndDisplayData);
     var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
     chart.draw(data, options);
 }
-
 
 function fetchAndDisplayData() {
     const collection = document.getElementById('dataSelector').value;
