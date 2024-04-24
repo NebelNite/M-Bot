@@ -366,7 +366,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function fetchCommand(route,command)
     {
-        
+        console.log("fetchedCommand!");
+
         fetch(route, {
             method: 'POST',
             headers: {
@@ -375,20 +376,20 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify(command)
         })
         .then(response => {
+            console.log("Response:", response);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return response.json();
         })
         .then(data => {
+            console.log("Data:", data);
             console.log('Server response:', data);
         })
         .catch(error => {
             console.error('Error:', error);
         });
     }
-
-
     
 
     function handleMouseOver(direction) {
@@ -399,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {
             direction = handleKeyDiagonal();
         }
-
+        
         const command = {
             typ: direction,
             command: direction
@@ -561,17 +562,14 @@ document.addEventListener('DOMContentLoaded', function () {
     window.location.href = "/sensorData";
 });
 
-    
-
 
     function sendSpeed(command) {
-        
         fetchCommand('/sendSpeed', command);   
     }
-    
+
 });
      </script> 
-</html> 
+</html>
 
 
 

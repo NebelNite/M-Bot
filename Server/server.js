@@ -159,9 +159,7 @@ app.get('/fetch', async (req, res) => {
 
 
 
-app.get('/sensorData', (req, res) => {
-    res.redirect('/html/sensorData.html');
-});
+
 
 
 app.get('*/css/.css', function (req, res, next) {
@@ -190,17 +188,46 @@ app.get('/requestSensorData', (req, res) => {
 });
 
 
+
 app.get('/movement', requireLogin, (req, res) => {
     res.sendFile(__dirname + "/html/movement.html");
 });
 
+/*
+app.get('/movement', (req, res) => {
+    res.sendFile(__dirname + "/html/movement.html");
+});
+
+*/
+
 
 app.get('/html/sensorData.html', (req, res) => {
+
+    //findMBotWorkAround();
     res.sendFile(__dirname + '/html/sensorData.html');
+
   });
   
+  app.get('/sensorData', (req, res) => {
 
-  
+    //findMBotWorkAround();
+    res.redirect('/html/sensorData.html');
+});
+
+
+function findMBotWorkAround()
+{
+  const subnetsToScan = [subnets];
+
+  if(mBotIp == null)
+  {
+      scanNetwork(subnetsToScan);
+  }
+
+  //sendBroadcastMessage("MBotDiscovery");
+
+  listenForUdpMessages();
+}
   
 
 
@@ -221,8 +248,7 @@ app.post('/movement', (req, res) => {
 app.post('/sendMovement', (req, res) => {
 
     command = req.body;
-
-
+    
     sendCommandToMbot(command);
     res.end();
 
@@ -266,8 +292,8 @@ function sendCommandToMbot(command) {
     if(mbotData != undefined)
     {
         const client = dgram.createSocket('udp4');
-        const buffer = Buffer.from(command.toString());
-        
+
+        const buffer = Buffer.from(command);
 
         client.send(buffer, 0, buffer.length, mbotData.port, mbotData.address, (error) => {
             if (error) {
@@ -444,16 +470,20 @@ function listenForUdpMessages() {
         server.send(responseMessage, remote.port, remote.address);
         
         //mBotConnectionInterval = setInterval(checkMbotConnection, 5000);
-
+        
+        //server.close();
+        //receiveMBotData();
 
       }
     });
   
     // Close the server when the function is no longer needed
+    
     return () => {
       server.close();
-      receiveMBotData();
+      //receiveMBotData();
     };
+
   }
   
 
@@ -512,26 +542,51 @@ server.listen(port, ip, () => {
 });
 
 
+/*
 
+const DbClient = new MongoClient(uri);
+ 
+async function getDataFromDB(collectionName) {
+    try {
+        await DbClient.connect();
+        const database = DbClient.db("your_database_name");
+        const collection = database.collection(collectionName);
+        const data = await collection.find({}).toArray();
+        return data;
+    } finally {
+        await DbClient.close();
+    }
+}
+ 
+app.get('/data', async (req, res) => {
+    const collectionName = req.query.collection; // Collection name from query parameter
+    const data = await getDataFromDB(collectionName);
+    res.json(data);
+});
+
+*/
 
 function receiveMBotData()
 {
-    // Create a UDP server
+
     const serv = dgram.createSocket('udp4');
     
     console.log("In: receiveMBotData");
-
+    
     if(mBotIp != null)
     {
         server.bind(mBotPort, mBotIp);
         
         console.log("Listening/MBotData");
-
+        
         // Handle incoming messages
+
         server.on('message', (message, remote) => {
             console.log(message.toString());
             sensorData = message.toString();
-
+            
+            console.log(sensorData);
+            
             /*
             message = message.toString();
             sensors = message.split(';');
