@@ -160,8 +160,6 @@ app.get('/fetch', async (req, res) => {
 
 
 
-
-
 app.get('*/css/.css', function (req, res, next) {
     res.set('Content-Type', 'text/css');
     next();
@@ -171,6 +169,10 @@ app.get('*js/.js', function (req, res, next) {
     res.set('Content-Type', 'application/javascript');
     next();
 });
+
+
+
+
 
 
 let sensorData = undefined
@@ -228,8 +230,6 @@ function findMBotWorkAround()
 
   listenForUdpMessages();
 }
-  
-
 
 
 app.post('/movement', (req, res) => {
@@ -250,6 +250,9 @@ app.post('/sendMovement', (req, res) => {
     command = req.body;
     
     sendCommandToMbot(command);
+    
+    res.send({message: "Received"});
+
     res.end();
 
 });
@@ -278,9 +281,13 @@ app.post('/sendColor', (req, res) => {
     
 });
 
+/*
+app.post('/receiveMBotData',(req,res) => {
 
 
+});
 
+*/
 
 
 
@@ -292,9 +299,9 @@ function sendCommandToMbot(command) {
     if(mbotData != undefined)
     {
         const client = dgram.createSocket('udp4');
-
+        
         const buffer = Buffer.from(command);
-
+        
         client.send(buffer, 0, buffer.length, mbotData.port, mbotData.address, (error) => {
             if (error) {
                 console.error(`Fehler beim Senden der Nachricht an ${mbotData.address}:${mbotData.port}:`, error);
@@ -324,7 +331,8 @@ function requireLogin(req, res, next) {
         //sendBroadcastMessage("MBotDiscovery");
 
         listenForUdpMessages();
-
+        receiveMBotData();
+        
         return next();
     } else {
         res.redirect("/login");
@@ -332,54 +340,6 @@ function requireLogin(req, res, next) {
 }
 
 
-
-
-function sendBroadcastMessage(message) {
-
-/*
-    // Set the broadcast options
-    const broadcastOptions = {
-      host: '255.255.255.255',
-      port: 1234,
-      multicast: false
-    };
-    
-    // Set the message to send
-    //message = Buffer.from('hello world');
-
-    
-
-    // Create a UDP socket and send the broadcast message
-    udpBroadcast.send(broadcastOptions, message, (error) => {
-      if (error) {
-        console.error('Error sending broadcast message:', error);
-      } else {
-        console.log('Broadcast message sent successfully!');
-      }
-    });
-
-    */
-
-    
-    /*
-    const client = dgram.createSocket('udp4');
-
-    // Set the broadcast option to true
-    client.setBroadcast(true);
-
-    // Send the message to the broadcast address
-    client.send(message, 0, message.length, mBotPort, '255.255.255.255', (error) => {
-        if (error) {
-            console.error(`Fehler beim Senden der Broadcast-Nachricht:`, error);
-        } else {
-            console.log(`Broadcast-Nachricht erfolgreich gesendet: ${message}`);
-        }
-
-        // Close the client after sending the message
-        client.close();
-    });
-    */
-}
 
 
 function scanNetwork(subnets) {
@@ -406,6 +366,7 @@ function scanNetwork(subnets) {
             console.error('Fehler beim Netzwerkscan:', error);
         });
 }
+
 
 
 function sendMessageToDevices(devices, message) {
@@ -568,7 +529,6 @@ app.get('/data', async (req, res) => {
 
 function receiveMBotData()
 {
-
     const serv = dgram.createSocket('udp4');
     
     console.log("In: receiveMBotData");
@@ -581,12 +541,13 @@ function receiveMBotData()
         
         // Handle incoming messages
 
-        server.on('message', (message, remote) => {
+        server.on('message', async (message, remote) => {
+          
             console.log(message.toString());
             sensorData = message.toString();
             
             console.log(sensorData);
-            
+
             /*
             message = message.toString();
             sensors = message.split(';');

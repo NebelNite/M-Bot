@@ -64,7 +64,7 @@ function drawChart(dataArray) {
     var data = new google.visualization.DataTable();
     data.addColumn('string', 'X'); // Modify according to your data keys
     data.addColumn('number', 'Y'); // Modify according to your data keys
-
+    
     // Convert data to Google Charts compatible format
     data.addRows(dataArray.map(item => [item.xValue, item.yValue]));
 
@@ -76,6 +76,7 @@ function drawChart(dataArray) {
         legend: 'none'
     };
 
+    
     // Instantiate and draw our chart, passing in some options.
     var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
     chart.draw(data, options);
