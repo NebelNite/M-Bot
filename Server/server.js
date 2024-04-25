@@ -539,15 +539,14 @@ function receiveMBotData()
         
         console.log("Listening/MBotData");
         
-        // Handle incoming messages
-
+        // Receive SensorData of MBot
         server.on('message', async (message, remote) => {
           
             console.log(message.toString());
             sensorData = message.toString();
-            
             console.log(sensorData);
 
+            
             /*
             message = message.toString();
             sensors = message.split(';');
