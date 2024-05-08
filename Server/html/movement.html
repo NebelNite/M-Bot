@@ -245,6 +245,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
     const leftArea = document.querySelector('.left');
     const rightArea = document.querySelector('.right');
     const forwardArea = document.querySelector('.forward');
@@ -278,6 +279,41 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Selected Speed:', selectedSpeed);
         speedSelector.style.display = 'none';
     });
+
+
+    
+setInterval(() => {
+
+  fetch(`/getMBotData`)
+    .then(response => response.json())
+    .then(data => {
+
+      const sensorDataString = data.message;
+
+      let sensors = sensorDataString.split(';');
+
+          let i = 0;
+
+          for (let m of sensors) 
+          {
+            pair = m.split(':');
+
+            value = pair[1];
+            startUpTimer = parseFloat(value);
+
+            if(value == -1)
+            {
+                alert("Timeout!");
+                clearInterval(dataInterval);
+            }
+
+          }
+    })
+    .catch(error => 
+    console.error('Error fetching data:')
+  );
+}, 1000);
+
 
 
     let pressedKeys = new Set();

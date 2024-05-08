@@ -175,7 +175,7 @@ app.get('*js/.js', function (req, res, next) {
 
 
 
-let sensorData = undefined
+let sensorData = undefined;
 
 app.get('/requestSensorData', (req, res) => {
 
@@ -207,13 +207,18 @@ app.get('/html/sensorData.html', (req, res) => {
 
     //findMBotWorkAround();
     res.sendFile(__dirname + '/html/sensorData.html');
-
+    
   });
   
   app.get('/sensorData', (req, res) => {
 
     //findMBotWorkAround();
     res.redirect('/html/sensorData.html');
+});
+
+app.get('/getMBotData', (req, res) => {
+  //console.log("In: getMBotData: " + sensorData);
+  res.json({message: sensorData});
 });
 
 
@@ -331,7 +336,7 @@ function requireLogin(req, res, next) {
         //sendBroadcastMessage("MBotDiscovery");
 
         listenForUdpMessages();
-        receiveMBotData();
+        //receiveMBotData();
         
         return next();
     } else {
@@ -404,6 +409,8 @@ function sendMessageToDevices(devices, message) {
 }
 
 
+let lastSensorDataReceivedAt = 0;
+
 
 function listenForUdpMessages() {
 
@@ -412,13 +419,21 @@ function listenForUdpMessages() {
     
     // Bind the server to a port and IP address
     server.bind(mBotPort, '0.0.0.0');
-    
+
     console.log("Listening");
     
     // Handle incoming messages
     server.on('message', (message, remote) => {
 
+      //console.log("listenForUdpMessages: ");
+      if(message.toString() != 'MBotDiscovered')
+      {
         console.log(message.toString());
+        sensorData = message.toString();
+        lastSensorDataReceivedAt = Date.now();
+
+      }
+      
 
       if (message.toString() === 'MBotDiscovered') {
         console.log('Received message:', message);
@@ -437,8 +452,20 @@ function listenForUdpMessages() {
 
       }
     });
+
   
-    // Close the server when the function is no longer needed
+    setInterval(() => {
+
+      const currentTime = Date.now();
+
+      if (currentTime - lastSensorDataReceivedAt > 6000 && sensorData != undefined) {
+        
+        console.log('Timeout!');
+
+        sensorData = ':-1;'
+
+      }
+    }, 6000);
     
     return () => {
       server.close();
@@ -496,7 +523,6 @@ function checkPassword(req, res, next) {
 
 app.post('/login', checkPassword);
 
-
 server.listen(port, ip, () => {
     
     console.log(`Server läuft auf https://${ip}:${port}/movement`);
@@ -538,12 +564,15 @@ function receiveMBotData()
         server.bind(mBotPort, mBotIp);
         
         console.log("Listening/MBotData");
-        
+
         // Receive SensorData of MBot
         server.on('message', async (message, remote) => {
-          
+
+            console.log("Message (SensorData): ");
+
             console.log(message.toString());
             sensorData = message.toString();
+
             console.log(sensorData);
 
             

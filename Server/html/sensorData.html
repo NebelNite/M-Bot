@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link type="text/css" href="/css/movement.css">
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0/dist/chartjs-adapter-moment.min.js"></script>
+    
     <style>
       body {
           font-family: Arial, sans-serif;
@@ -27,8 +30,7 @@
           align-items: center;
           justify-content: center;
           flex-direction: column;
-          position: relative; 
-      }
+          position: relative; }
       /* Add additional CSS here... */
     </style>
 
@@ -39,11 +41,11 @@
     </header>
 <main>
   <select id="dataSelector" onchange="fetchAndDisplayData()">
-    <option value="collection1">Collection 1</option>
-    <option value="collection2">Collection 2</option>
-    <!-- Add more options based on your collections -->
+    <option value="startUpTimer">Start Up Timer</option>
+    <option value="distance">Distance</option>
+    <option value="volume">Volume</option>
 </select>
-<div id="chart_div"></div>
+<canvas id="chart"></canvas>
 </main>
 
 <footer>
@@ -51,45 +53,230 @@
 </footer>
 </body>
 
+
 <script>
 
-// Load the Visualization API and the corechart package.
-google.charts.load('current', {'packages':['corechart']});
+let startUpTimer, distance, volume;
 
-// Set a callback to run when the Google Visualization API is loaded.
-google.charts.setOnLoadCallback(fetchAndDisplayData);
+setInterval(() => {
+  
+    fetch(`/getMBotData`)
+      .then(response => response.json())
+      .then(data => {
 
-function drawChart(dataArray) {
-    // Create the data table.
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'X'); // Modify according to your data keys
-    data.addColumn('number', 'Y'); // Modify according to your data keys
+        const sensorDataString = data.message;
+
+        
+        //const sensorDataObj = JSON.parse(sensorDataJson);
     
-    // Convert data to Google Charts compatible format
-    data.addRows(dataArray.map(item => [item.xValue, item.yValue]));
+            sensors = sensorDataString.split(';');
 
-    // Set chart options
-    var options = {
-        title: 'Live Data Display',
-        hAxis: {title: 'X Axis Label'},
-        vAxis: {title: 'Y Axis Label'},
-        legend: 'none'
-    };
 
+            let i = 0;
+            for (let m of sensors) 
+            {
+              pair = m.split(':');
+              description= pair[0];
+              value = pair[1];
+
+              if(i == 0)
+              {
+                startUpTimer = parseFloat(value);
+
+                if(startUpTimer == -1)
+                {
+                  alert("Timeout!");
+                  clearInterval(dataInterval);
+                }
+
+              }
+              else if(i == 1)
+              {
+                distance = parseFloat(value);
+              }
+              else if (i == 2)
+              {
+                volume = parseFloat(value);
+              }
+
+              i++;
+              //valuesList.push(value);
+            }
+
+            fetchAndDisplayData2();
+        //drawChart(data);
+        //console.log(sensors);
+      })
+      .catch(error => 
+      console.error('Error fetching data:')
+    );
+  }, 1000);
+  
+  
+  let chart;
+
+function drawChart() {
+
+    const selectedSensor = document.getElementById('dataSelector').value;
+    let value;
+
+
+    if (selectedSensor == 'startUpTimer') {
+      value = startUpTimer;
+    } else if (selectedSensor == 'distance') {
+      value = distance;
+    } else if (selectedSensor == 'volume') {
+      value = volume;
+    }
+
+    chartData.push({x: new Date(), y: value});
     
-    // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-    chart.draw(data, options);
+
+    chart = Chart.getChart('chart');
+    if (chart) {
+        chart.data.datasets[0].data = chartData;
+        chart.update();
+    } else {
+        const ctx = document.getElementById('chart').getContext('2d');
+        const config = {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: selectedSensor,
+                    data: chartData,
+                    borderColor: 'red',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'second'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        };
+        new Chart(ctx, config);
+    }
 }
+
+
+let currentSelectedOption = "";
+
+let chartData = [];
+let chartDatasets = [];
+
+function fetchAndDisplayData2() {
+
+  var selectElement = document.getElementById("dataSelector");
+  var selectedOption = selectElement.options[selectElement.selectedIndex].value;
+
+  if (selectedOption != currentSelectedOption) {
+
+    /*
+    if (chart) {
+            chart.destroy(); // Destroy the existing chart instance
+            chart = new Chart(ctx, config);
+        }*/
+
+
+    if (selectedOption == "startUpTimer") {
+
+      chartDatasets = [{
+        label: "Start Up Timer",
+        data: chartData,
+        borderColor: "red",
+        fill: false,
+      }];
+    } else if (selectedOption == "distance") {
+      chartDatasets = [{
+        label: "Distance",
+        data: chartData,
+        borderColor: "blue",
+        fill: false,
+      }];
+    } else if (selectedOption == "volume") {
+      chartDatasets = [{
+        label: "Volume",
+        data: chartData,
+        borderColor: "green",
+        fill: false,
+      }];
+    }
+
+    currentSelectedOption = selectedOption;
+  }
+
+  if (selectedOption == "startUpTimer") {
+    chartData.push({
+      x: new Date(),
+      y: startUpTimer,
+    });
+  } else if (selectedOption == "distance") {
+    chartData.push({
+      x: new Date(),
+      y: distance,
+    });
+  } else if (selectedOption == "volume") {
+    chartData.push({
+      x: new Date(),
+      y: volume,
+    });
+  }
+
+chart = Chart.getChart("chart");
+  if (chart) {
+    chart.data.datasets = chartDatasets;
+    chart.update();
+  } else {
+    const ctx = document.getElementById("chart").getContext("2d");
+    const config = {
+      type: "line",
+      data: {
+        datasets: chartDatasets,
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            type: "time",
+            time: {
+              unit: "second",
+            },
+          },
+          y: {
+            beginAtZero: true,
+          },
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+      },
+    };
+    new Chart(ctx, config);
+  }
+}
+
 
 function fetchAndDisplayData() {
-    const collection = document.getElementById('dataSelector').value;
-    fetch(`/data?collection=${collection}`)
-        .then(response => response.json())
-        .then(data => {
-            drawChart(data);
-        })
-        .catch(error => console.error('Error fetching data:', error));
+    /*
+    chartData = [];
+    drawChart();*/
 }
-  </script>
-</html>
+
+
+</script>
