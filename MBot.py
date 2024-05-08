@@ -16,6 +16,9 @@ import _thread
 
 
 
+speed = 100
+boolPrevention = False
+
 cyberpi.console.println("Value: ")
 
 angleValue = cyberpi.angle_sensor
@@ -58,7 +61,12 @@ def moveBackwards():
     cyberpi.mbot2.drive_power(-speed,speed)
 
 def moveForwardW():
+    
     cyberpi.mbot2.drive_power(speed,-speed)
+    
+    
+    
+
 
 
         
@@ -101,6 +109,7 @@ cyberpi.mbot2.EM_stop(port = "all")
 # Blue
 cyberpi.led.on(0, 0, 255)
 
+
 # Check if connected to the Wi-Fi network
 while True:
 
@@ -130,7 +139,6 @@ sockaddr = cyberpi.network.get_ip()
 
 
 port=12345
-speed = 100
 
 
 
@@ -162,8 +170,16 @@ while True:
 
 
 
-
-
+def preventionMode():
+    
+    if(boolPrevention):
+        distance = cyberpi.ultrasonic2.get(index=1)
+    
+    if(boolPrevention):
+        if(distance < 20):
+            moveBackwards()
+            time.sleep(1)
+            cyberpi.mbot2.EM_stop(port = "all")
 
 
 
@@ -173,12 +189,15 @@ while True:
 
 def sendServer():
     while True:
-        cyberpi.console.println('In:sendServer()')
+        #cyberpi.console.println('In:sendServer()')
         startUpTimer = "StartUpTimer:" + str(startUpCounter.get()) + ";"
         distance = "Distance:" + str(cyberpi.ultrasonic2.get(index=1)) + ";"
-        #volume = "Volume:" + str(cyberpi.get_loudness(mode = "maximum"))  + ";"
-        volume = "Volume: " + "Testvolume"
-        data = startUpTimer + distance + volume
+        volume = "Volume:" + str(cyberpi.get_loudness())  + ";"
+        #volume = "Volume: " + "Testvolume"
+        
+        lightness = "Lightness:" + str(lightValue.get()) + ";"
+        
+        data = startUpTimer + distance + volume + lightness
         udp_socket.sendto(data.encode(), (addr[0],port))  #senden
         time.sleep(1)
         
@@ -188,7 +207,9 @@ def sendServer():
 
 def receiveServer():
     while True:
+        
         global speed
+        global boolPrevention
         
         cyberpi.console.println('Loop') 
         
@@ -276,10 +297,21 @@ def receiveServer():
             b = int(rgb_components[2])
                 
             cyberpi.led.on(r,g,b)
-                
-            # direction: oben rechts
+            
         elif commandTyp == "9":
-            cyberpi.mbot2.drive_power(speed,-speed/2)
+            
+            boolPrevention = command
+            cyberpi.console.println('Prevention changed')
+            
+            if(boolPrevention):
+                _thread.start_new_thread(preventionMode,())
+
+
+            
+            # direction: oben rechts
+            
+        #elif commandTyp == "9":
+            #cyberpi.mbot2.drive_power(speed,-speed/2)
         
         
         
@@ -294,7 +326,7 @@ _thread.start_new_thread(sendServer,())
 _thread.start_new_thread(receiveServer,())
 
 
-    
+
 
 
 

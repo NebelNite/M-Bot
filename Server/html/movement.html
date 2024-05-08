@@ -27,11 +27,18 @@
             
             
             <div class="Movement On/Off">
-
                 <h2>Turn On/Off Movement</h2>
-
                 <label class="switch">
                 <input type="checkbox" id="toggleSwitch">
+                <span class="slider round"></span>
+                </label>
+            </div>
+
+                        
+            <div class="Suicide Prevention On/Off">
+                <h2>Turn On/Off Suicide Prevention</h2>
+                <label class="switch">
+                <input type="checkbox" id="toggleSwitchPrevention">
                 <span class="slider round"></span>
                 </label>
             </div>
@@ -259,6 +266,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmColorBtn = document.getElementById('confirmColor');
     const colorInput = document.getElementById('color');
     const toggleSwitch = document.getElementById('toggleSwitch');
+    const toggleSwitchPrevention = document.getElementById('toggleSwitchPrevention');
+    
 
     const openWindowBtn = document.getElementById('openWindowBtn');
     
@@ -368,6 +377,7 @@ setInterval(() => {
 
     // Handle color confirmation
     confirmColorBtn.addEventListener('click', function () {
+
         let selectedColor = colorInput.value;
         console.log('Selected Color:', selectedColor);
         colorSelector.style.display = 'none';
@@ -537,8 +547,22 @@ setInterval(() => {
         handleMouseOut();
     });
 
+    
 
 
+    toggleSwitchPrevention.addEventListener('change', function () {
+
+        const checked = toggleSwitchPrevention.checked;
+
+        const command = {
+            typ: '9',
+            command: checked
+        };
+
+        
+        fetchCommand('/sendMovement',command)
+
+    });
 
 
     function sendMovement(command) {

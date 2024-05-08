@@ -457,9 +457,9 @@ function listenForUdpMessages() {
     setInterval(() => {
 
       const currentTime = Date.now();
-
+      
       if (currentTime - lastSensorDataReceivedAt > 6000 && sensorData != undefined) {
-        
+
         console.log('Timeout!');
 
         sensorData = ':-1;'
