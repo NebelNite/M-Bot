@@ -277,6 +277,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
+
+
+
     settingsIconColor.addEventListener('click', function () {
 
         colorSelector.style.display = 'block';
@@ -372,6 +375,23 @@ setInterval(() => {
         }
     });
 
+    
+
+    
+    document.addEventListener('keyup', function(event) {
+    const key = event.key.toLowerCase();
+    
+    if (key === 'f') {
+
+        const command = {
+            typ: '10'
+        };
+        
+        fetchCommand('/playSound', command);
+    }
+
+    });
+    
     
 
 
@@ -558,12 +578,13 @@ setInterval(() => {
             typ: '9',
             command: checked
         };
-
+    
         
         fetchCommand('/sendMovement',command)
-
+        
     });
-
+    
+    
 
     function sendMovement(command) {
 
@@ -571,7 +592,9 @@ setInterval(() => {
             fetchCommand('/sendMovement',command)
         }
     }
-
+    
+    
+    
 
     
 

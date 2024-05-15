@@ -286,6 +286,16 @@ app.post('/sendColor', (req, res) => {
     
 });
 
+app.post('/playSound', (req, res) => {
+
+  command = req.body;
+  
+  sendCommandToMbot(command);
+
+  res.end();
+  
+});
+
 /*
 app.post('/receiveMBotData',(req,res) => {
 
@@ -293,7 +303,6 @@ app.post('/receiveMBotData',(req,res) => {
 });
 
 */
-
 
 
 
@@ -319,7 +328,7 @@ function sendCommandToMbot(command) {
 }
 
 
-let subnets = '10.10.1';
+let subnets = '10.10.0';
 
 
 function requireLogin(req, res, next) {

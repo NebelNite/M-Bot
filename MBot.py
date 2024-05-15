@@ -18,8 +18,20 @@ import _thread
 
 speed = 100
 boolPrevention = False
+boolDriving = False
 
 cyberpi.console.println("Value: ")
+"""
+while True:
+    cyberpi.audio.play('yeah')
+    time.sleep(1)
+    cyberpi.audio.play('hi')
+    time.sleep(1)
+    cyberpi.audio.play('laugh')
+    time.sleep(1)
+"""
+
+
 
 angleValue = cyberpi.angle_sensor
 rgbValue = cyberpi.dual_rgb_sensor
@@ -61,9 +73,9 @@ def moveBackwards():
     cyberpi.mbot2.drive_power(-speed,speed)
 
 def moveForwardW():
-    
     cyberpi.mbot2.drive_power(speed,-speed)
-    
+    global boolDriving
+    boolDriving = True
     
     
 
@@ -169,19 +181,45 @@ while True:
 
 
 
-
 def preventionMode():
     
-    if(boolPrevention):
-        distance = cyberpi.ultrasonic2.get(index=1)
+    global boolPrevention
+    global speed
+    global boolDriving
     
-    if(boolPrevention):
-        if(distance < 20):
-            moveBackwards()
-            time.sleep(1)
+    cyberpi.console.println(boolPrevention)
+    
+    while(boolPrevention):
+        
+        cyberpi.console.println(speed)
+        
+        #cyberpi.console.println(boolPrevention)
+        
+        distance = cyberpi.ultrasonic2.get(index=1)
+        
+        distanceToDetect = 0
+        
+        if(speed == 100):
+            distanceToDetect = 80
+            
+        if(speed == 67):
+            distanceToDetect = 50
+        
+        if (speed == 33):
+            distanceToDetect = 40
+        
+        
+        cyberpi.console.println(distanceToDetect)
+        
+        #cyberpi.console.println("Distance: "+distance)
+        #cyberpi.console.println("DistanceToDetect: "+distanceToDetect)
+        
+        if(distance <= distanceToDetect and boolDriving):
             cyberpi.mbot2.EM_stop(port = "all")
-
-
+            cyberpi.mbot2.drive_power(100,100)
+            time.sleep(0.27)
+            cyberpi.mbot2.EM_stop(port = "all")
+            
 
 # ultrasonic2, loudness, abs
 
@@ -209,9 +247,7 @@ def receiveServer():
     while True:
         
         global speed
-        global boolPrevention
-        
-        cyberpi.console.println('Loop') 
+        global boolDriving
         
         #global boolRec
         
@@ -235,6 +271,7 @@ def receiveServer():
             #udp_socket.sendto('Response:' + response_message.encode(), (addr[0],port))  # Antwort senden  
             
             cyberpi.mbot2.drive_power(speed, speed)
+            boolDriving = False
                 #time.sleep(0.27)
                 #cyberpi.mbot2.EM_stop(port = "all")
                 
@@ -242,13 +279,14 @@ def receiveServer():
         elif commandTyp == "2":
             #response_message = "MoveBackwards"
             #udp_socket.sendto('Response:' + response_message.encode(), (addr[0],port))  # Antwort senden  
+            boolDriving = False
             moveBackwards()
             
         
         elif commandTyp == "3":
             #response_message = "MoveLeft"
             #udp_socket.sendto('Response:' + response_message.encode(), (addr[0],port))  # Antwort senden  
-                
+            boolDriving = False
             cyberpi.mbot2.drive_power(-speed, -speed)
             #time.sleep(0.27)
             #cyberpi.mbot2.EM_stop(port = "all")
@@ -257,6 +295,7 @@ def receiveServer():
                 
         elif commandTyp == "-1":
             #response_message = "Stop"
+            boolDriving = False
             #udp_socket.sendto('Response:' + response_message.encode(), (addr[0],port))  # Antwort senden  
                 
             cyberpi.mbot2.EM_stop(port = "all")
@@ -300,21 +339,30 @@ def receiveServer():
             
         elif commandTyp == "9":
             
+            global boolPrevention
+            
+            cyberpi.console.println(boolPrevention)
+            
             boolPrevention = command
+            
             cyberpi.console.println('Prevention changed')
             
+            cyberpi.console.println(boolPrevention)
+                        
             if(boolPrevention):
                 _thread.start_new_thread(preventionMode,())
-
-
+            else:
+                boolPrevention = False
+                
+        elif commandTyp == "10":
+            cyberpi.audio.play('yeah')
             
+
             # direction: oben rechts
             
         #elif commandTyp == "9":
             #cyberpi.mbot2.drive_power(speed,-speed/2)
-        
-        
-        
+            
 
 
 #receiveServer()
@@ -326,7 +374,7 @@ _thread.start_new_thread(sendServer,())
 _thread.start_new_thread(receiveServer,())
 
 
-
+    
 
 
 
