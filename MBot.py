@@ -9,55 +9,21 @@ import mbot2
 import event
 import os
 import _thread
-
-
-
-#import RPi.GPIO as GPIO
-
-
-
-speed = 100
-boolPrevention = False
-boolDriving = False
-
-cyberpi.console.println("Value: ")
-"""
-while True:
-    cyberpi.audio.play('yeah')
-    time.sleep(1)
-    cyberpi.audio.play('hi')
-    time.sleep(1)
-    cyberpi.audio.play('laugh')
-    time.sleep(1)
-"""
-
-
-
-angleValue = cyberpi.angle_sensor
-rgbValue = cyberpi.dual_rgb_sensor
-ultrasonicValue = cyberpi.ultrasonic
-flameValue = cyberpi.flame_sensor
-tempValue = cyberpi.temp_sensor
-soundValue = cyberpi.sound_sensor
-ultrasonicValue2 = cyberpi.ultrasonic2
-lightValue = cyberpi.light_sensor
-magneticValue = cyberpi.magnetic_sensor
-soilValue = cyberpi.soil_sensor
-rangingValue = cyberpi.ranging_sensor
-
-
-shake = cyberpi.get_shakeval
-
-startUpCounter = cyberpi.timer
+import mbuild
 
 
 
 
+    
+    
+#cyberpi.mbot2.led_on(255,0,0, "all", 1)
 
+#cyberpi.mbot2.forward(50, 1)
+#cyberpi.mbot2.turn_left(30, 1)
+#cyberpi.mbot2.backward(50, 1)
 
+stopMoveThread = True
 
-
-#time.sleep(100)
 
 def moveForwardDivs():
     cyberpi.mbot2.EM_stop(port = "all")
@@ -74,11 +40,127 @@ def moveBackwards():
     cyberpi.mbot2.drive_power(-speed,speed)
 
 def moveForwardW():
+    
     cyberpi.mbot2.drive_power(speed,-speed)
     global boolDriving
     boolDriving = True
     
     
+    
+
+
+def detect_color():
+    color = cyberpi.quad_rgb_sensor.get_color()
+    if color in ["red", "green", "blue", "yellow"]:
+        return True
+    return False
+
+
+def findStartOfLine():
+    
+    
+    cyberpi.mbot2.drive_power(speed,-speed)
+    global boolDriving
+    boolDriving = True
+    
+    
+    
+    L2 = cyberpi.quad_rgb_sensor.get_gray('l2', index = 1)
+    L1 = cyberpi.quad_rgb_sensor.get_gray('l1', index = 1)
+    R1 = cyberpi.quad_rgb_sensor.get_gray('r1', index = 1)
+    R2 = cyberpi.quad_rgb_sensor.get_gray('r2', index = 1)
+    
+    
+    if L1 < 50 and R1 < 50:
+        cyberpi.mbot2.EM_stop(port = "all")
+    
+    
+
+def lineFollower():
+    
+    cyberpi.console.println("In: LineFollower")
+    foundStart = True
+    
+    findStartOfLine()
+    
+    
+    
+    
+
+            
+    """
+    while True:
+        cyberpi.console.println("In: LineFollower")
+        
+        
+        
+        L2 = cyberpi.quad_rgb_sensor.get_gray('l2', index = 1)
+        L1 = cyberpi.quad_rgb_sensor.get_gray('l1', index = 1)
+        R1 = cyberpi.quad_rgb_sensor.get_gray('r1', index = 1)
+        R2 = cyberpi.quad_rgb_sensor.get_gray('r2', index = 1)
+        
+        if L1 < 50 and R1 < 50:
+         cyberpi.mbot2.drive_power(20, -20) #straight ahead
+         cyberpi.led.on(255,0,0,id=2)
+         cyberpi.led.on(255,0,0,id=4)
+         
+        elif L1 < 50:
+         cyberpi.mbot2.drive_power(5, -20) #turn left
+         cyberpi.led.on(255,0,0,id=2)
+         
+        elif R1 < 50:
+         cyberpi.mbot2.drive_power(20, -5) #turn right
+         cyberpi.led.on(255,0,0,id=4)
+         
+        else:
+         cyberpi.led.on(0,255,0)
+        """
+        
+    time.sleep(0.1)
+    
+
+
+
+
+
+
+
+speed = 100
+boolPrevention = False
+boolDriving = False
+
+cyberpi.console.println("Value: ")
+
+
+
+
+angleValue = cyberpi.angle_sensor
+rgbValue = cyberpi.dual_rgb_sensor
+ultrasonicValue = cyberpi.ultrasonic
+flameValue = cyberpi.flame_sensor
+tempValue = cyberpi.temp_sensor
+soundValue = cyberpi.sound_sensor
+ultrasonicValue2 = cyberpi.ultrasonic2
+lightValue = cyberpi.light_sensor
+magneticValue = cyberpi.magnetic_sensor
+soilValue = cyberpi.soil_sensor
+rangingValue = cyberpi.ranging_sensor
+
+
+
+
+startUpCounter = cyberpi.timer
+
+
+
+
+
+
+
+
+#time.sleep(100)
+
+
 
 
         
@@ -264,6 +346,7 @@ def receiveServer():
         if commandTyp == "0":
             #response_message = "MoveForward"
             #udp_socket.sendto('Response:' + response_message.encode(), (addr[0],port))  # Antwort senden  
+            
             moveForwardW()
                 
         elif commandTyp == "1":
@@ -357,9 +440,10 @@ def receiveServer():
         elif commandTyp == "10":
             cyberpi.audio.play('yeah')
             
-        elif commandTyp == "11"
+        elif commandTyp == "11":
+            cyberpi.console.println('11')
+            _thread.start_new_thread(lineFollower,())
 
-            # direction: oben rechts
             
         #elif commandTyp == "9":
             #cyberpi.mbot2.drive_power(speed,-speed/2)
