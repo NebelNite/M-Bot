@@ -23,25 +23,36 @@
             <div class="settings-icons">
                 <div class="settings-icon" id="settingsIconSpeed">⚙️</div>
                 <div class="settings-icon" id="settingsIconColor">🔧</div>
-            </div>
-            
-            
-            <div class="Movement On/Off">
-                <h2>Turn On/Off Movement</h2>
-                <label class="switch">
-                <input type="checkbox" id="toggleSwitch">
-                <span class="slider round"></span>
-                </label>
-            </div>
+                
+                
+                <div class="Movement On/Off">
+                    <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider round"></span>
+                    </label>
+                </div>
 
-                        
-            <div class="Suicide Prevention On/Off">
-                <h2>Turn On/Off Suicide Prevention</h2>
-                <label class="switch">
-                <input type="checkbox" id="toggleSwitchPrevention">
-                <span class="slider round"></span>
-                </label>
+                            
+                <div class="Suicide Prevention On/Off">
+                    <label class="switch">
+                    <input type="checkbox" id="toggleSwitchPrevention">
+                    <span class="slider round"></span>
+                    </label>
+                </div>
+                
+
+                <div class="LineFollower On/Off">
+                    <label class="switch">
+                    <input type="checkbox" id="toggleSwitchLineFollower">
+                    <span class="slider round"></span>
+                    </label>
+                </div>
+
+
             </div>
+            
+            
+
 
             <button id="openWindowBtn">MBot-Data</button>
 
@@ -61,6 +72,7 @@
                 <input type="color" id="color" name="color" value="#ff0000">
                 <button id="confirmColor">Bestätigen</button>
             </div>
+
         </main>
     
         <footer>
@@ -267,7 +279,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const colorInput = document.getElementById('color');
     const toggleSwitch = document.getElementById('toggleSwitch');
     const toggleSwitchPrevention = document.getElementById('toggleSwitchPrevention');
+    const toggleSwitchLineFollower = document.getElementById('toggleSwitchLineFollower');
     
+
+    
+    toggleSwitchLineFollower.addEventListener('change', function () {
+
+    const checked = toggleSwitchLineFollower.checked;
+
+    const command = {
+        typ: '11',
+        command: checked
+    };
+    
+    fetchCommand('/sendLineFollower',command)
+
+    });
+
+
 
     const openWindowBtn = document.getElementById('openWindowBtn');
     
@@ -375,7 +404,6 @@ setInterval(() => {
         }
     });
 
-    
 
     
     document.addEventListener('keyup', function(event) {
@@ -391,11 +419,9 @@ setInterval(() => {
     }
 
     });
-    
-    
 
 
-    // Handle color confirmation
+
     confirmColorBtn.addEventListener('click', function () {
 
         let selectedColor = colorInput.value;
@@ -578,7 +604,6 @@ setInterval(() => {
             typ: '9',
             command: checked
         };
-    
         
         fetchCommand('/sendMovement',command)
         
@@ -636,6 +661,14 @@ setInterval(() => {
                     toggleSwitch.checked = !toggleSwitch.checked;
                 }
             }
+
+            if (event.key == '4') {
+                var toggleSwitchPrevention = document.getElementById('toggleSwitchPrevention');
+                if (toggleSwitchPrevention) {
+                    toggleSwitchPrevention.checked = !toggleSwitchPrevention.checked;
+                }
+            }
+
         });
         
         

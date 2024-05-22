@@ -87,7 +87,7 @@ const server = https.createServer(options, app);
 const io = socketIo(server);
 
 
-/*
+
 // MongoDB connection string.
 const mongoUri = 'mongodb+srv://tomto:12345@cluster0.lzvmtde.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 const clientMongoDB = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -150,7 +150,7 @@ app.get('/fetch', async (req, res) => {
 
 
 
-*/
+
 
 
 
@@ -296,6 +296,19 @@ app.post('/playSound', (req, res) => {
   
 });
 
+
+
+app.post('/sendLineFollower', (req, res) => {
+
+  command = req.body;
+  
+  sendCommandToMbot(command);
+
+  res.end();
+  
+});
+
+
 /*
 app.post('/receiveMBotData',(req,res) => {
 
@@ -328,8 +341,7 @@ function sendCommandToMbot(command) {
 }
 
 
-let subnets = '10.10.0';
-
+let subnets = '10.10.1';
 
 function requireLogin(req, res, next) {
 
