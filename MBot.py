@@ -45,6 +45,7 @@ magneticValue = cyberpi.magnetic_sensor
 soilValue = cyberpi.soil_sensor
 rangingValue = cyberpi.ranging_sensor
 
+
 shake = cyberpi.get_shakeval
 
 startUpCounter = cyberpi.timer
@@ -78,7 +79,6 @@ def moveForwardW():
     boolDriving = True
     
     
-
 
 
         
@@ -357,6 +357,7 @@ def receiveServer():
         elif commandTyp == "10":
             cyberpi.audio.play('yeah')
             
+        elif commandTyp == "11"
 
             # direction: oben rechts
             
@@ -364,13 +365,12 @@ def receiveServer():
             #cyberpi.mbot2.drive_power(speed,-speed/2)
             
 
-
 #receiveServer()
 #sendServer()
 
 
 # Start both Sending and Receiving Threads
-_thread.start_new_thread(sendServer,())
+_thread.start_new_thread(sendServer,()) 
 _thread.start_new_thread(receiveServer,())
 
 
