@@ -1,689 +1,511 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-        <link type="text/css" href="/css/movement.css">
-    </head>
 
-    <body>
-        <header>
-            <h1>MBot-Movement</h1>
-        </header>
-    
-        <main>
-            <div class="grid-container">
-                <div class="clickable-area forward" id="forwardArea">Vorwärts</div>
-                <div class="clickable-area backward" id="backwardArea">Rückwärts</div>
-                <div class="clickable-area left" id="leftArea">Links</div>
-                <div class="clickable-area right" id="rightArea">Rechts</div>
-            </div>
-    
-            <div class="settings-icons">
-                <div class="settings-icon" id="settingsIconSpeed">⚙️</div>
-                <div class="settings-icon" id="settingsIconColor">🔧</div>
-                
-                
-                <div class="Movement On/Off">
-                    <label class="switch">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" href="/css/movement.css">
+</head>
+
+<body>
+    <header>
+        <h1>MBot-Movement</h1>
+    </header>
+    <main>
+        <div class="grid-container">
+            <div class="clickable-area forward" id="forwardArea">Vorwärts</div>
+            <div class="clickable-area backward" id="backwardArea">Rückwärts</div>
+            <div class="clickable-area left" id="leftArea">Links</div>
+            <div class="clickable-area right" id="rightArea">Rechts</div>
+        </div>
+        <div class="settings-icons">
+            <div class="settings-icon" id="settingsIconSpeed">⚙️</div>
+            <div class="settings-icon" id="settingsIconColor">🔧</div>
+            <div class="Movement On/Off">
+                <label class="switch">
                     <input type="checkbox" id="toggleSwitch">
                     <span class="slider round"></span>
-                    </label>
-                </div>
-
-                            
-                <div class="Suicide Prevention On/Off">
-                    <label class="switch">
+                </label>
+            </div>
+            <div class="Suicide Prevention On/Off">
+                <label class="switch">
                     <input type="checkbox" id="toggleSwitchPrevention">
                     <span class="slider round"></span>
-                    </label>
-                </div>
-                
-
-                <div class="LineFollower On/Off">
-                    <label class="switch">
+                </label>
+            </div>
+            <div class="LineFollower On/Off">
+                <label class="switch">
                     <input type="checkbox" id="toggleSwitchLineFollower">
                     <span class="slider round"></span>
-                    </label>
-                </div>
-
-
+                </label>
             </div>
-            
-            
-
-
-            <button id="openWindowBtn">MBot-Data</button>
-
-            
-            <div class="settings-panel" id="speedSelector">
-                <label for="speed">Geschwindigkeit:</label>
-                <select name="speed" id="speed">
-                    <option value="slow">Langsam</option>
-                    <option value="medium">Mittel</option>
-                    <option value="fast">Schnell</option>
+            <div>
+                <select id="mbotDropdown" multiple>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
-                <button id="confirmSpeed">Bestätigen</button>
             </div>
-            
-            <div class="settings-panel" id="colorSelector">
-                <label for="color">Wähle eine Farbe:</label>
-                <input type="color" id="color" name="color" value="#ff0000">
-                <button id="confirmColor">Bestätigen</button>
-            </div>
+        </div>
+        <button id="openWindowBtn">MBot-Data</button>
+        <div class="settings-panel" id="speedSelector">
+            <label for="speed">Geschwindigkeit:</label>
+            <select name="speed" id="speed">
+                <option value="slow">Langsam</option>
+                <option value="medium">Mittel</option>
+                <option value="fast">Schnell</option>
+            </select>
+            <button id="confirmSpeed">Bestätigen</button>
+        </div>
+        <div class="settings-panel" id="colorSelector">
+            <label for="color">Wähle eine Farbe:</label>
+            <input type="color" id="color" name="color" value="#ff0000">
+            <button id="confirmColor">Bestätigen</button>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Remote Control. All rights reserved.</p>
+    </footer>
+</body>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+    }
 
-        </main>
-    
-        <footer>
-            <p>&copy; 2024 Remote Control. All rights reserved.</p>
-        </footer>
+    header {
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        text-align: center;
+    }
 
-    </body>
-    <!-- 
-    <script src="../js/movement.js"></script>
-     -->    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
+    main {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        position: relative;
+    }
 
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 20px;
-            text-align: center;
-        }
-        
-        main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            position: relative; 
-        }
+    /* Basic styling for the switch */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
 
-        /* Basic styling for the switch */
-        .switch {
-          position: relative;
-          display: inline-block;
-          width: 60px;
-          height: 34px;
-        }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
 
-        .switch input { 
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
 
-        .slider {
-          position: absolute;
-          cursor: pointer;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: #ccc;
-          -webkit-transition: .4s;
-          transition: .4s;
-        }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
 
-        .slider:before {
-          position: absolute;
-          content: "";
-          height: 26px;
-          width: 26px;
-          left: 4px;
-          bottom: 4px;
-          background-color: white;
-          -webkit-transition: .4s;
-          transition: .4s;
-        }
+    input:checked+.slider {
+        background-color: #2196F3;
+    }
 
-        input:checked + .slider {
-          background-color: #2196F3;
-        }
+    input:focus+.slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
 
-        input:focus + .slider {
-          box-shadow: 0 0 1px #2196F3;
-        }
+    input:checked+.slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
 
-        input:checked + .slider:before {
-          -webkit-transform: translateX(26px);
-          -ms-transform: translateX(26px);
-          transform: translateX(26px);
-        }
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
 
-        /* Rounded sliders */
-        .slider.round {
-          border-radius: 34px;
-        }
+    .slider.round:before {
+        border-radius: 50%;
+    }
 
-        .slider.round:before {
-          border-radius: 50%;
-        }
+    .right {
+        grid-area: r;
+    }
 
-        .right {
-            grid-area: r;
-        }
+    .left {
+        grid-area: l;
+    }
 
-        .left {
-            grid-area: l;
+    .forward {
+        grid-area: f;
+        margin-top: 10px;
+    }
 
-        }
+    .backward {
+        grid-area: b;
+    }
 
+    .grid-container {
+        width: 80%;
+        height: 80vh;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        grid-template-areas: '. f .' 'l b r' '. . .';
+        grid-gap: 10px;
+    }
 
-        .forward {
-            grid-area: f;
-            margin-top: 10px;
-        }
+    .clickable-area {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
 
-        .backward {
-            grid-area: b;
-        }
+    .clickable-area:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
 
-        
-        .grid-container {
-            
-            width: 80%;
-            height: 80vh;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            grid-template-areas: '. f .' 
-                                'l b r' 
-                                '. . .';
-            grid-gap: 10px;
-        }
+    .settings-icons {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+    }
 
-        .clickable-area {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    .settings-icon {
+        cursor: pointer;
+        font-size: 20px;
+        transition: transform 0.3s ease;
+        margin-left: 10px;
+    }
 
-        .clickable-area:hover {
-            background-color: rgba(0, 0, 0, 0.2);
-        }
+    .settings-icon:hover {
+        transform: rotate(45deg);
+    }
 
-        .settings-icons {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-        }
+    .settings-panel {
+        display: none;
+        position: absolute;
+        top: 15%;
+        left: 80%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
 
-        .settings-icon {
-            cursor: pointer;
-            font-size: 20px;
-            transition: transform 0.3s ease;
-            margin-left: 10px;
-        }
+    .settings-panel label,
+    .settings-panel button {
+        display: block;
+        margin: 10px auto;
+        width: 80%;
+    }
 
-        .settings-icon:hover {
-            transform: rotate(45deg);
-        }
+    footer {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 10px 0;
+    }
 
-        .settings-panel {
-            display: none;
-            position: absolute;
-            top: 15%;
-            left: 80%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-
-        .settings-panel label,
-        .settings-panel button {
-            display: block;
-            margin: 10px auto;
-            width: 80%;
-        }
-
-        footer {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-        }
-    </style>
-
+    #mbotDropdown {
+        display: block !important;
+        width: auto !important;
+        height: auto !important;
+    }
+</style>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        const leftArea = document.querySelector('.left');
+        const rightArea = document.querySelector('.right');
+        const forwardArea = document.querySelector('.forward');
+        const backwardArea = document.querySelector('.backward');
+        const settingsIconSpeed = document.getElementById('settingsIconSpeed');
+        const settingsIconColor = document.getElementById('settingsIconColor');
+        const speedSelector = document.getElementById('speedSelector');
+        const confirmSpeedBtn = document.getElementById('confirmSpeed');
+        const speedSelect = document.getElementById('speed');
+        const colorSelector = document.getElementById('colorSelector');
+        const confirmColorBtn = document.getElementById('confirmColor');
+        const colorInput = document.getElementById('color');
+        const toggleSwitch = document.getElementById('toggleSwitch');
+        const toggleSwitchPrevention = document.getElementById('toggleSwitchPrevention');
+        const toggleSwitchLineFollower = document.getElementById('toggleSwitchLineFollower');
+        const openWindowBtn = document.getElementById('openWindowBtn');
 
-    const leftArea = document.querySelector('.left');
-    const rightArea = document.querySelector('.right');
-    const forwardArea = document.querySelector('.forward');
-    const backwardArea = document.querySelector('.backward');
-    const settingsIconSpeed = document.getElementById('settingsIconSpeed');
-    const settingsIconColor = document.getElementById('settingsIconColor');
-    const speedSelector = document.getElementById('speedSelector');
-    const confirmSpeedBtn = document.getElementById('confirmSpeed');
-    const speedSelect = document.getElementById('speed');
-    const colorSelector = document.getElementById('colorSelector');
-    const confirmColorBtn = document.getElementById('confirmColor');
-    const colorInput = document.getElementById('color');
-    const toggleSwitch = document.getElementById('toggleSwitch');
-    const toggleSwitchPrevention = document.getElementById('toggleSwitchPrevention');
-    const toggleSwitchLineFollower = document.getElementById('toggleSwitchLineFollower');
-    
+        let selectedMbots = [];
 
-    
-    toggleSwitchLineFollower.addEventListener('change', function () {
-
-    const checked = toggleSwitchLineFollower.checked;
-
-    const command = {
-        typ: '11',
-        command: checked
-    };
-    
-    fetchCommand('/sendLineFollower',command)
-
-    });
-
-
-
-    const openWindowBtn = document.getElementById('openWindowBtn');
-    
-    settingsIconSpeed.addEventListener('click', function () {
-
-        speedSelector.style.display = 'block';
-
-    });
-
-
-
-
-    settingsIconColor.addEventListener('click', function () {
-
-        colorSelector.style.display = 'block';
-
-    });
-
-    confirmSpeedBtn.addEventListener('click', function () {
-        let selectedSpeed = speedSelect.value;
-        console.log('Selected Speed:', selectedSpeed);
-        speedSelector.style.display = 'none';
-    });
-
-
-    
-setInterval(() => {
-
-  fetch(`/getMBotData`)
-    .then(response => response.json())
-    .then(data => {
-
-      const sensorDataString = data.message;
-
-      let sensors = sensorDataString.split(';');
-
-          let i = 0;
-
-          for (let m of sensors) 
-          {
-            pair = m.split(':');
-
-            value = pair[1];
-            startUpTimer = parseFloat(value);
-
-            if(value == -1)
-            {
-                alert("Timeout!");
-                clearInterval(dataInterval);
-            }
-
-          }
-    })
-    .catch(error => 
-    console.error('Error fetching data:')
-  );
-}, 1000);
-
-
-
-    let pressedKeys = new Set();
-    let keyCount = 0;
-
-    document.addEventListener('keydown', function(event) {
-        
-        const key = event.key.toLowerCase(); // Um Groß- und Kleinschreibung zu berücksichtigen
-
-        pressedKeys[key] = true;
-        keyCount++;
-        
-
-
-        switch(key) {
-            case 'w':
-                handleMouseOver(0); // Vorwärts
-                break;
-            case 'a':
-                handleMouseOver(3); // Links
-                break;
-            case 's':
-                handleMouseOver(2); // Rückwärts
-                break;
-            case 'd':
-                handleMouseOver(1); // Rechts
-                break;
-            default:
-                break;
-        }
-    });
-
-    document.addEventListener('keyup', function(event) {
-        const key = event.key.toLowerCase(); // Um Groß- und Kleinschreibung zu berücksichtigen
-        delete pressedKeys[key];
-        keyCount--;
-
-        switch(key) {
-            case 'w':
-            case 'a':
-            case 's':
-            case 'd':
-                handleMouseOut(); // Wenn eine WASD-Taste losgelassen wird, soll der Mbot stoppen
-                break;
-            default:
-                break;
-        }
-    });
-
-
-    
-    document.addEventListener('keyup', function(event) {
-    const key = event.key.toLowerCase();
-    
-    if (key === 'f') {
-
-        const command = {
-            typ: '10'
-        };
-        
-        fetchCommand('/playSound', command);
-    }
-
-    });
-
-
-
-    confirmColorBtn.addEventListener('click', function () {
-
-        let selectedColor = colorInput.value;
-        console.log('Selected Color:', selectedColor);
-        colorSelector.style.display = 'none';
-
-        selectedColor = selectedColor.replace('#', '');
-
-        const r = parseInt(selectedColor.slice(0, 2), 16);
-        const g = parseInt(selectedColor.slice(2, 4), 16);
-        const b = parseInt(selectedColor.slice(4, 6), 16);
-        
-        rgb = r+":"+g+":"+b;
-        
-
-        const command = {
-            typ: '8',
-            command: rgb
-        };
-        
-        
-        sendColor(command);
-    });
-    
-    
-    function sendColor(command) {
-        
-        fetchCommand('/sendColor', command);
-    }
-
-    
-
-    function fetchCommand(route,command)
-    {
-        console.log("fetchedCommand!");
-
-        fetch(route, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(command)
-        })
-        .then(response => {
-            console.log("Response:", response);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Data:", data);
-            console.log('Server response:', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-    
-
-    function handleMouseOver(direction) {
-
-        console.log('Mouse Over!');
-
-        if(pressedKeys.size >= 2)
-        {
-            direction = handleKeyDiagonal();
-        }
-        
-        const command = {
-            typ: direction,
-            command: direction
-        };
-        
-
-        sendMovement(command);
-    }
-
-    function handleMouseOut() {
-
-        console.log('Mouse Out!');
-
-        
-        const command = {
-            typ: -1,
-            command: -1
-        };
-
-
-        sendMovement(command);
-    }
-    
-
-    function handleKeyDiagonal()
-    {
-            
-        if (pressedKeys['w']) {
-
-            if (pressedKeys['a']) {
-                return 9;
-            }
-            else if (pressedKeys['d']) {
-                return 10;
+        async function fetchMbotList() {
+            try {
+                const response = await fetch('/mbots');
+                const mbotList = await response.json();
+                console.log('Fetched mBot list:', mbotList); // Debug message
+                updateDropdown(mbotList);
+            } catch (error) {
+                console.error('Error fetching mBot list:', error); // Debug message
             }
         }
 
-        else if (pressedKeys['s']) {
-
-            if (pressedKeys['a']) {
-                return 11;
+        function updateDropdown(mbotList) {
+            const dropdown = document.getElementById('mbotDropdown');
+            const selectedValues = Array.from(dropdown.selectedOptions).map(option => option.value);
+            dropdown.innerHTML = '';
+            if (mbotList.length === 0) {
+                console.log('No mBots found'); // Debug message
+                return;
             }
-
-            else if (pressedKeys['d']) {
-
-                return 12;
-            }
-        }
-
-        if(pressedKeys['d'])
-        {
-            if (pressedKeys['w']) {
-                return 13;
-            }
-
-            if (pressedKeys['s']) {
-                return 14;
-            }
-        }
-
-        if(pressedKeys['a'])
-        {
-            if (pressedKeys['w']) {
-                return 15;
-            }
-            if (pressedKeys['s']) {
-                return 16;
-            }
-        }
-
-    }
-
-
-
-
-    leftArea.addEventListener('mouseover', () => {
-        handleMouseOver(3);
-    });
-    rightArea.addEventListener('mouseover', () => {
-        handleMouseOver(1);
-    });
-    forwardArea.addEventListener('mouseover', () => {
-        handleMouseOver(0);
-    });
-    backwardArea.addEventListener('mouseover', () => {
-        handleMouseOver(2);
-    });
-
-
-    leftArea.addEventListener('mouseout', () => {
-        handleMouseOut();
-    });
-    rightArea.addEventListener('mouseout', () => {
-        handleMouseOut();
-    });
-    forwardArea.addEventListener('mouseout', () => {
-        handleMouseOut();
-    });
-    backwardArea.addEventListener('mouseout', () => {
-        handleMouseOut();
-    });
-
-    
-
-
-    toggleSwitchPrevention.addEventListener('change', function () {
-
-        const checked = toggleSwitchPrevention.checked;
-
-        const command = {
-            typ: '9',
-            command: checked
-        };
-        
-        fetchCommand('/sendMovement',command)
-        
-    });
-    
-    
-
-    function sendMovement(command) {
-
-        if(toggleSwitch.checked){
-            fetchCommand('/sendMovement',command)
-        }
-    }
-    
-    
-    
-
-    
-
-    confirmSpeedBtn.addEventListener('click', function () {
-
-        let selectedSpeed = speedSelect.value;
-        console.log('Selected Speed:', selectedSpeed);
-        speedSelector.style.display = 'none';
-
-        if(selectedSpeed == "medium")
-        {
-            selectedSpeed = '6';
-        }
-        else if(selectedSpeed == 'slow')
-        {
-            selectedSpeed = '5';
-        }
-        else if(selectedSpeed == 'fast')
-        {
-            selectedSpeed = '7';
-        }
-        
-
-        const command = {
-            command: selectedSpeed,
-            typ: selectedSpeed
-        };
-        
-        sendSpeed(command);
-});
-
-
-
-    document.addEventListener('keydown', function(event) {
-
-            if (event.key == '3') {
-                var toggleSwitch = document.getElementById('toggleSwitch');
-                if (toggleSwitch) {
-                    toggleSwitch.checked = !toggleSwitch.checked;
+            mbotList.forEach(mbot => {
+                const option = document.createElement('option');
+                option.value = mbot.ip;
+                option.text = mbot.ip;
+                if (selectedValues.includes(mbot.ip)) {
+                    option.selected = true;
                 }
-            }
+                dropdown.appendChild(option);
+            });
+            console.log('Dropdown updated with mBots:', mbotList); // Debug message
+        }
 
-            if (event.key == '4') {
-                var toggleSwitchPrevention = document.getElementById('toggleSwitchPrevention');
-                if (toggleSwitchPrevention) {
-                    toggleSwitchPrevention.checked = !toggleSwitchPrevention.checked;
-                }
-            }
+        function fetchCommand(route, command) {
+            console.log("fetchedCommand!", command, selectedMbots);
 
+            fetch(route, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command, selectedMbots })
+            })
+                .then(response => {
+                    console.log("Response:", response);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Data:", data);
+                    console.log('Server response:', data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        toggleSwitchLineFollower.addEventListener('change', function () {
+            const checked = toggleSwitchLineFollower.checked;
+            const command = {
+                typ: '11',
+                command: checked
+            };
+            fetchCommand('/sendLineFollower', command);
         });
-        
-        
+
+        settingsIconSpeed.addEventListener('click', function () {
+            speedSelector.style.display = 'block';
+        });
+
+        settingsIconColor.addEventListener('click', function () {
+            colorSelector.style.display = 'block';
+        });
+
+        confirmSpeedBtn.addEventListener('click', function () {
+            let selectedSpeed = speedSelect.value;
+            console.log('Selected Speed:', selectedSpeed);
+            speedSelector.style.display = 'none';
+
+            if (selectedSpeed == "medium") {
+                selectedSpeed = '6';
+            } else if (selectedSpeed == 'slow') {
+                selectedSpeed = '5';
+            } else if (selectedSpeed == 'fast') {
+                selectedSpeed = '7';
+            }
+
+            const command = {
+                command: selectedSpeed,
+                typ: selectedSpeed
+            };
+
+            sendSpeed(command);
+        });
+
+        confirmColorBtn.addEventListener('click', function () {
+            let selectedColor = colorInput.value;
+            console.log('Selected Color:', selectedColor);
+            colorSelector.style.display = 'none';
+
+            selectedColor = selectedColor.replace('#', '');
+            const r = parseInt(selectedColor.slice(0, 2), 16);
+            const g = parseInt(selectedColor.slice(2, 4), 16);
+            const b = parseInt(selectedColor.slice(4, 6), 16);
+            const rgb = r + ":" + g + ":" + b;
+
+            const command = {
+                typ: '8',
+                command: rgb
+            };
+
+            sendColor(command);
+        });
+
+        function sendColor(command) {
+            fetchCommand('/sendColor', command);
+        }
+
+        function handleMouseOver(direction) {
+            console.log('Mouse Over!');
+            const command = {
+                typ: direction,
+                command: direction
+            };
+            sendMovement(command);
+        }
+
+        function handleMouseOut() {
+            console.log('Mouse Out!');
+            const command = {
+                typ: -1,
+                command: -1
+            };
+            sendMovement(command);
+        }
+
+        function sendMovement(command) {
+            if (toggleSwitch.checked) {
+                fetchCommand('/sendMovement', command);
+            }
+        }
+
+        function sendSpeed(command) {
+            fetchCommand('/sendSpeed', command);
+        }
+
+        toggleSwitchPrevention.addEventListener('change', function () {
+            const checked = toggleSwitchPrevention.checked;
+            const command = {
+                typ: '9',
+                command: checked
+            };
+            fetchCommand('/sendMovement', command);
+        });
+
+        leftArea.addEventListener('mouseover', () => {
+            handleMouseOver(3);
+        });
+        rightArea.addEventListener('mouseover', () => {
+            handleMouseOver(1);
+        });
+        forwardArea.addEventListener('mouseover', () => {
+            handleMouseOver(0);
+        });
+        backwardArea.addEventListener('mouseover', () => {
+            handleMouseOver(2);
+        });
+
+        leftArea.addEventListener('mouseout', () => {
+            handleMouseOut();
+        });
+        rightArea.addEventListener('mouseout', () => {
+            handleMouseOut();
+        });
+        forwardArea.addEventListener('mouseout', () => {
+            handleMouseOut();
+        });
+        backwardArea.addEventListener('mouseout', () => {
+            handleMouseOut();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            const key = event.key.toLowerCase();
+            if (key === 'f') {
+                const command = {
+                    typ: '10'
+                };
+                fetchCommand('/playSound', command);
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            const key = event.key.toLowerCase();
+            switch (key) {
+                case 'w':
+                    handleMouseOver(0); // Vorwärts
+                    break;
+                case 'a':
+                    handleMouseOver(3); // Links
+                    break;
+                case 's':
+                    handleMouseOver(2); // Rückwärts
+                    break;
+                case 'd':
+                    handleMouseOver(1); // Rechts
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', function (event) {
+            const key = event.key.toLowerCase();
+            switch (key) {
+                case 'w':
+                case 'a':
+                case 's':
+                case 'd':
+                    handleMouseOut(); // Wenn eine WASD-Taste losgelassen wird, soll der Mbot stoppen
+                    break;
+                default:
+                    break;
+            }
+        });
+
         openWindowBtn.addEventListener('click', function () {
-    window.location.href = "/sensorData";
-});
+            window.location.href = "/sensorData";
+        });
 
+        document.getElementById('mbotDropdown').addEventListener('change', function () {
+            selectedMbots = Array.from(this.selectedOptions).map(option => option.value);
+            console.log('Selected mBots:', selectedMbots); // Debug message
+        });
 
-    function sendSpeed(command) {
-        fetchCommand('/sendSpeed', command);   
-    }
+        // Continually fetch the mBot list at regular intervals
+        setInterval(fetchMbotList, 5000); // Adjust the interval as needed (e.g., every 5 seconds)
 
-});
-     </script> 
+        // Fetch the initial mBot list
+        fetchMbotList();
+    });
+</script>
+
 </html>
-
-
-
