@@ -57,6 +57,7 @@
     <option value="distance">Distance</option>
     <option value="volume">Volume</option>
 </select>
+<button id="toggleButton" onclick="toggleDataMode()">Switch to Historical Data</button>
 <canvas id="chart"></canvas>
 </main>
 
@@ -65,73 +66,71 @@
 </footer>
 </body>
 
-
 <script>
+  let startUpTimer, distance, volume;
+  let dataInterval;
+  let realTimeMode = true;
 
-let startUpTimer, distance, volume;
+  function startRealTimeUpdates() {
+    dataInterval = setInterval(() => {
+      fetch(`/getMBotData`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log("Real-time data fetched:", data);
+          const sensorDataString = data.message;
 
-setInterval(() => {
+          console.log("sensorDataString type:", typeof sensorDataString);
+          console.log("sensorDataString value:", sensorDataString);
 
-    fetch(`/getMBotData`)
-      .then(response => response.json())
-      .then(data => {
+          if (typeof sensorDataString !== 'string') {
+            console.error('Expected string but got:', typeof sensorDataString);
+            return;
+          }
 
-        const sensorDataString = data.message;
+          sensors = sensorDataString.split(';');
 
-        
-        //const sensorDataObj = JSON.parse(sensorDataJson);
-    
-            sensors = sensorDataString.split(';');
+          let i = 0;
+          for (let m of sensors) {
+            pair = m.split(':');
+            description = pair[0];
+            value = pair[1];
 
+            if (i == 0) {
+              startUpTimer = parseFloat(value);
 
-            let i = 0;
-            for (let m of sensors) 
-            {
-              pair = m.split(':');
-              description= pair[0];
-              value = pair[1];
-
-              if(i == 0)
-              {
-                startUpTimer = parseFloat(value);
-
-                if(startUpTimer == -1)
-                {
-                  alert("Timeout!");
-                  clearInterval(dataInterval);
-                }
-
+              if (startUpTimer == -1) {
+                alert("Timeout!");
+                clearInterval(dataInterval);
               }
-              else if(i == 1)
-              {
-                distance = parseFloat(value);
-              }
-              else if (i == 2)
-              {
-                volume = parseFloat(value);
-              }
-
-              i++;
-              //valuesList.push(value);
+            } else if (i == 1) {
+              distance = parseFloat(value);
+            } else if (i == 2) {
+              volume = parseFloat(value);
             }
 
-            fetchAndDisplayData();
-        //drawChart(data);
-        //console.log(sensors);
-      })
-      .catch(error => 
-      console.error('Error fetching data:')
-    );
-  }, 1000);
-  
-  
-  let chart;
+            i++;
+          }
 
-function drawChart() {
+          fetchAndDisplayData();
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }, 1000);
+  }
+
+  function stopRealTimeUpdates() {
+    clearInterval(dataInterval);
+  }
+
+  function drawChart() {
+    console.log("Drawing chart with current data:", chartData);
 
     const selectedSensor = document.getElementById('dataSelector').value;
     let value;
-
 
     if (selectedSensor == 'startUpTimer') {
       value = startUpTimer;
@@ -141,147 +140,175 @@ function drawChart() {
       value = volume;
     }
 
-    chartData.push({x: new Date(), y: value});
-    
+    chartData.push({ x: new Date(), y: value });
 
     chart = Chart.getChart('chart');
     if (chart) {
-        chart.data.datasets[0].data = chartData;
-        chart.update();
+      chart.data.datasets[0].data = chartData;
+      chart.update();
     } else {
-        const ctx = document.getElementById('chart').getContext('2d');
-        const config = {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: selectedSensor,
-                    data: chartData,
-                    borderColor: 'red',
-                    fill: false
-                }]
+      const ctx = document.getElementById('chart').getContext('2d');
+      const config = {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: selectedSensor,
+            data: chartData,
+            borderColor: 'red',
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'second'
+              }
             },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'second'
-                        }
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
+            y: {
+              beginAtZero: true
             }
-        };
-        new Chart(ctx, config);
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      };
+      new Chart(ctx, config);
     }
-}
+  }
 
+  let currentSelectedOption = "";
+  let chartData = [];
+  let chartDatasets = [];
 
-let currentSelectedOption = "";
+  function fetchAndDisplayData() {
+    console.log("Fetching and displaying data");
 
-let chartData = [];
-let chartDatasets = [];
+    var selectElement = document.getElementById("dataSelector");
+    var selectedOption = selectElement.options[selectElement.selectedIndex].value;
 
-function fetchAndDisplayData() {
-  
-  var selectElement = document.getElementById("dataSelector");
-  var selectedOption = selectElement.options[selectElement.selectedIndex].value;
+    if (selectedOption != currentSelectedOption) {
+      selectedSensor = document.getElementById('dataSelector').value;
+      chartData.length = 0;
 
-  if (selectedOption != currentSelectedOption) {
+      if (selectedOption == "startUpTimer") {
+        chartDatasets = [{
+          label: "Start Up Timer",
+          data: chartData,
+          borderColor: "red",
+          fill: false,
+        }];
+      } else if (selectedOption == "distance") {
+        chartDatasets = [{
+          label: "Distance",
+          data: chartData,
+          borderColor: "blue",
+          fill: false,
+        }];
+      } else if (selectedOption == "volume") {
+        chartDatasets = [{
+          label: "Volume",
+          data: chartData,
+          borderColor: "green",
+          fill: false,
+        }];
+      }
 
-    // clear Chart
-    selectedSensor = document.getElementById('dataSelector').value;
-    chartData.length = 0;
-
+      currentSelectedOption = selectedOption;
+    }
 
     if (selectedOption == "startUpTimer") {
-
-      chartDatasets = [{
-        label: "Start Up Timer",
-        data: chartData,
-        borderColor: "red",
-        fill: false,
-      }];
+      chartData.push({
+        x: new Date(),
+        y: startUpTimer,
+      });
     } else if (selectedOption == "distance") {
-      chartDatasets = [{
-        label: "Distance",
-        data: chartData,
-        borderColor: "blue",
-        fill: false,
-      }];
+      chartData.push({
+        x: new Date(),
+        y: distance,
+      });
     } else if (selectedOption == "volume") {
-      chartDatasets = [{
-        label: "Volume",
-        data: chartData,
-        borderColor: "green",
-        fill: false,
-      }];
+      chartData.push({
+        x: new Date(),
+        y: volume,
+      });
     }
 
-    currentSelectedOption = selectedOption;
-  }
-
-  if (selectedOption == "startUpTimer") {
-    chartData.push({
-      x: new Date(),
-      y: startUpTimer,
-    });
-  } else if (selectedOption == "distance") {
-    chartData.push({
-      x: new Date(),
-      y: distance,
-    });
-  } else if (selectedOption == "volume") {
-    chartData.push({
-      x: new Date(),
-      y: volume,
-    });
-  }
-  
-chart = Chart.getChart("chart");
-  if (chart) {
-    chart.data.datasets = chartDatasets;
-    chart.update();
-  } else {
-    const ctx = document.getElementById("chart").getContext("2d");
-    const config = {
-      type: "line",
-      data: {
-        datasets: chartDatasets,
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            type: "time",
-            time: {
-              unit: "second",
+    chart = Chart.getChart("chart");
+    if (chart) {
+      chart.data.datasets = chartDatasets;
+      chart.update();
+    } else {
+      const ctx = document.getElementById("chart").getContext("2d");
+      const config = {
+        type: "line",
+        data: {
+          datasets: chartDatasets,
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: "time",
+              time: {
+                unit: "second",
+              },
+            },
+            y: {
+              beginAtZero: true,
             },
           },
-          y: {
-            beginAtZero: true,
+          plugins: {
+            legend: {
+              display: false,
+            },
           },
         },
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
-      },
-    };
-    new Chart(ctx, config);
+      };
+      new Chart(ctx, config);
+    }
   }
-}
 
+  async function loadAllData() {
+    const selectedSensor = document.getElementById('dataSelector').value;
+    try {
+      const response = await fetch(`/api/getSensorData`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Historical data fetched:", data);
+      chartData.length = 0;
 
+      data.forEach(entry => {
+        chartData.push({
+          x: new Date(entry.timestamp),
+          y: entry[selectedSensor.toLowerCase()]
+        });
+      });
 
+      drawChart();
+    } catch (error) {
+      console.error('Error loading all data:', error);
+    }
+  }
 
+  function toggleDataMode() {
+    if (realTimeMode) {
+      stopRealTimeUpdates();
+      document.getElementById('toggleButton').innerText = "Switch to Real-Time Data";
+      loadAllData();
+    } else {
+      startRealTimeUpdates();
+      document.getElementById('toggleButton').innerText = "Switch to Historical Data";
+    }
+    realTimeMode = !realTimeMode;
+  }
+
+  startRealTimeUpdates();
 </script>
