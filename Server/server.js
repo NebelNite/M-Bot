@@ -9,6 +9,7 @@ const dgram = require('dgram');
 const ping = require('ping');
 const os = require('os');
 const socketIo = require('socket.io');
+const path = require('path');
 const { MongoClient } = require('mongodb');
 
 const port = 3001;
@@ -25,11 +26,16 @@ app.use(session({
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public'));
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'html')));
+app.use('/css', express.static(path.join(__dirname, 'css')));
+app.use('/js', express.static(path.join(__dirname, 'js')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 const options = {
-  key: fs.readFileSync(__dirname + '/key.pem'),
-  cert: fs.readFileSync(__dirname + '/cert.pem'),
+  key: fs.readFileSync(path.join(__dirname, 'key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'cert.pem')),
   rejectUnauthorized: false
 };
 
@@ -43,12 +49,12 @@ MongoClient.connect(mongoUrl, {
   tls: true,
   tlsAllowInvalidCertificates: true
 })
-  .then(client => {
-    console.log('Connected to MongoDB');
-    db = client.db(dbName);
-    sensorDataCollection = db.collection(collectionName);
-  })
-  .catch(error => console.error(error));
+    .then(client => {
+      console.log('Connected to MongoDB');
+      db = client.db(dbName);
+      sensorDataCollection = db.collection(collectionName);
+    })
+    .catch(error => console.error(error));
 
 app.post('/api/sensorData', (req, res) => {
   console.log('Received POST request to /api/sensorData');
@@ -70,14 +76,14 @@ app.post('/api/sensorData', (req, res) => {
   };
 
   sensorDataCollection.insertOne(sensorData)
-    .then(result => {
-      console.log('Sensor data stored successfully:', result);
-      res.status(201).send({ message: 'Sensor data stored successfully' });
-    })
-    .catch(error => {
-      console.error('Error storing sensor data:', error);
-      res.status(500).send({ message: 'Error storing sensor data' });
-    });
+      .then(result => {
+        console.log('Sensor data stored successfully:', result);
+        res.status(201).send({ message: 'Sensor data stored successfully' });
+      })
+      .catch(error => {
+        console.error('Error storing sensor data:', error);
+        res.status(500).send({ message: 'Error storing sensor data' });
+      });
 });
 
 app.get('/api/sensorData/longterm', async (req, res) => {
@@ -90,15 +96,8 @@ app.get('/api/sensorData/longterm', async (req, res) => {
   }
 });
 
-app.get('/api/getSensorData', (req, res) => {
-  sensorDataCollection.find().toArray()
-    .then(data => {
-      res.status(200).json(data);
-    })
-    .catch(error => {
-      console.error('Error fetching sensor data:', error);
-      res.status(500).send({ message: 'Error fetching sensor data' });
-    });
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'html', 'index.html'));
 });
 
 const server = https.createServer(options, app);
@@ -109,11 +108,11 @@ app.get('/requestSensorData', (req, res) => {
 });
 
 app.get('/movement', requireLogin, (req, res) => {
-  res.sendFile(__dirname + "/html/movement.html");
+  res.sendFile(path.join(__dirname, 'html', 'movement.html'));
 });
 
 app.get('/html/sensorData.html', (req, res) => {
-  res.sendFile(__dirname + '/html/sensorData.html');
+  res.sendFile(path.join(__dirname, 'html', 'sensorData.html'));
 });
 
 app.get('/sensorData', (req, res) => {
@@ -222,12 +221,12 @@ function listenForUdpMessages() {
 
         // Save the data to MongoDB
         sensorDataCollection.insertOne(sensorDataToSave)
-          .then(result => {
-            console.log('Sensor data stored successfully:', result);
-          })
-          .catch(error => {
-            console.error('Error storing sensor data:', error);
-          });
+            .then(result => {
+              console.log('Sensor data stored successfully:', result);
+            })
+            .catch(error => {
+              console.error('Error storing sensor data:', error);
+            });
       } else {
         console.error('Invalid sensor data:', sensorDataObj);
       }
@@ -289,14 +288,14 @@ function scanNetwork(subnets) {
   });
 
   Promise.all(promises)
-    .then(results => {
-      const reachableDevices = results.filter(result => result.alive).map(result => result.host);
-      console.log('Reachable devices in the network:', reachableDevices);
-      sendMessageToDevices(reachableDevices, "MBotDiscovery");
-    })
-    .catch(error => {
-      console.error('Error during network scan:', error);
-    });
+      .then(results => {
+        const reachableDevices = results.filter(result => result.alive).map(result => result.host);
+        console.log('Reachable devices in the network:', reachableDevices);
+        sendMessageToDevices(reachableDevices, "MBotDiscovery");
+      })
+      .catch(error => {
+        console.error('Error during network scan:', error);
+      });
 }
 
 function sendMessageToDevices(devices, message) {
@@ -318,19 +317,19 @@ function sendMessageToDevices(devices, message) {
   });
 
   Promise.all(promises)
-    .then(() => {
-      client.close();
-    })
-    .catch(error => {
-      console.error('Error sending messages:', error);
-      client.close();
-    });
+      .then(() => {
+        client.close();
+      })
+      .catch(error => {
+        console.error('Error sending messages:', error);
+        client.close();
+      });
 }
 
 let lastSensorDataReceivedAt = 0;
 
 app.get('/login', (req, res) => {
-  res.sendFile(__dirname + "/html/login.html");
+  res.sendFile(path.join(__dirname, 'html', 'login.html'));
 });
 
 function checkPassword(req, res, next) {
