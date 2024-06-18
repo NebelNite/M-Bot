@@ -15,7 +15,7 @@ const port = 3001;
 let mbotList = [];
 let mBotPort = 12345;
 let sensorData = {};
-const collectionName = 'sensorDataCollection';
+const collectionName = 'sensorData';
 
 const app = express();
 app.use(session({
@@ -78,6 +78,16 @@ app.post('/api/sensorData', (req, res) => {
       console.error('Error storing sensor data:', error);
       res.status(500).send({ message: 'Error storing sensor data' });
     });
+});
+
+app.get('/api/sensorData/longterm', async (req, res) => {
+  try {
+    const data = await sensorDataCollection.find().sort({ timestamp: 1 }).toArray();
+    res.json(data);
+  } catch (err) {
+    console.error('Error fetching sensor data:', err);
+    res.status(500).send({ message: 'Error fetching sensor data' });
+  }
 });
 
 app.get('/api/getSensorData', (req, res) => {

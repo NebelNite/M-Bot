@@ -1,189 +1,246 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gute Verkäufer GesMBH</title>
-    <link type="text/css" href="/css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: #f0f0f0;
+            color: #333;
+            height: 100%;
+            overflow-x: hidden; /* Disable horizontal scrolling */
+        }
+
+        header, footer {
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header .top-bar, footer {
+            text-align: center;
+            padding: 10px 20px;
+        }
+
+        header .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a, .login-button {
+            text-decoration: none;
+            color: #333;
+            margin: 0 10px;
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover, .login-button:hover {
+            background-color: #B00B69;
+            color: white;
+        }
+
+        #login-form {
+            position: absolute;
+            right: 20px;
+            top: 60px;
+            border: 1px solid #555;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 200px;
+        }
+
+        .login-form input, .login-form button {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 5px;
+        }
+
+        .wrapper {
+            width: 80%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .hero-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .hero-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .hero-item:nth-child(odd) {
+            flex-direction: row;
+        }
+
+        .hero-image {
+            width: 40%;
+            max-width: 300px;
+            margin: 0 20px;
+        }
+
+        .hero-text {
+            width: 60%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-item:nth-child(even) .hero-text {
+            text-align: right;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        section p {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            width: 100%;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+    </style>
 </head>
-<style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        font-family: 'Roboto', sans-serif;
-        background: #f0f0f0;
-        color: #333;
-    }
-
-    header, footer {
-        width: 100%;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    header .top-bar, footer {
-        text-align: center;
-        padding: 10px 20px;
-    }
-
-    header .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .logo {
-        font-size: 24px;
-        font-weight: bold;
-    }
-
-    nav {
-        display: flex;
-        align-items: center;
-    }
-
-    nav a, .login-button {
-        text-decoration: none;
-        color: #333;
-        margin: 0 10px;
-        padding: 8px 16px;
-        border: none;
-        background: none;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: all 0.3s ease; /* Smooth transition for hover effects */
-    }
-
-    nav a:hover, .login-button:hover {
-        background-color: #B00B69;
-        color: white;
-        text-decoration: none; /* You could add an underline here if preferred */
-    }
-
-    nav a:hover {
-        box-shadow: inset 0 -2px 0 0 #B00B69; /* Adds an underline effect on hover */
-    }
-
-    #login-form {
-        position: absolute;
-        right: 20px;
-        top: 60px; /* Adjust based on actual header size */
-        border: 1px solid #555;
-        padding: 10px;
-        background: white;
-        border-radius: 4px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        width: auto; /* Auto width based on content */
-    }
-
-    .login-form input, .login-form button {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 5px;
-    }
-
-    .login-form button {
-        text-decoration: none;
-        color: #333;
-        margin: 0 10px;
-        padding: 8px 16px;
-        border: none;
-        background: none;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-    }
-
-    .wrapper {
-        width: 70%;
-        max-width: 1200px;
-        margin: auto;
-        padding: 20px;
-    }
-
-    .hero-content {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        margin-bottom: 50px;
-    }
-
-    .hero-item {
-        display: flex;
-        align-items: center;
-    }
-
-    .hero-image {
-        width: 50%;
-        margin-right: 20px;
-    }
-
-    .hero-text {
-        width: 50%;
-    }
-
-    main > section {
-        margin-bottom: 100px; /* Increased space between sections */
-    }
-
-    footer {
-        text-align: center;
-        padding: 20px;
-    }
-
-    footer p {
-        margin: 0;
-    }
-</style>
 <body>
-    <header>
-        <div class="top-bar">
-            <div class="logo">Logo</div>
-            <nav>
-                <a href="#home">Home</a>
-                <a href="#about">About</a>
-                <a href="#services">Services</a>
-                <a href="#contact">Contact</a>
-                <button onclick="toggleLogin()" class="login-button">Login</button> <!-- Moved inside nav for alignment -->
-            </nav>
-        </div>
-        <div id="login-form" class="login-form" style="display: none;">
-            <form action="/login" method="post">
-                <input type="password" id="password" name="password" placeholder="Enter Password" required>
-                <button type="submit">Submit</button>
-            </form>
-        </div>
-    </header>
-    <main class="wrapper">
-        <section class="hero">
-            <div class="hero-content">
-                <div class="hero-item">
-                    <img src="path_to_image.jpg" alt="Image Description" class="hero-image">
-                    <div class="hero-text">
-                        <h1>Welcome to Our Website</h1>
-                        <p>Explore our services and offerings.</p>
-                    </div>
-                </div>
-                <!-- Repeat the hero-item div as needed for alternating images and text -->
+<header>
+    <div class="top-bar">
+        <div class="logo">Gute Verkäufer GesMBH</div>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#about">Über uns</a>
+            <a href="#services">Dienstleistungen</a>
+            <a href="#contact">Kontakt</a>
+            <button onclick="toggleLogin()" class="login-button">Login</button>
+        </nav>
+    </div>
+    <div id="login-form" class="login-form" style="display: none;">
+        <form action="/login" method="post">
+            <input type="password" id="password" name="password" placeholder="Passwort eingeben" required>
+            <button type="submit">Einreichen</button>
+        </form>
+    </div>
+</header>
+<main class="wrapper">
+    <section class="hero">
+        <div class="hero-item" style="justify-content: center;">
+            <div class="hero-text" style="text-align: center;">
+                <h1>Willkommen auf unserer Website</h1>
+                <p>Erkunden Sie unsere Dienstleistungen und Angebote.</p>
             </div>
-        </section>
-        <section id="about">
-            <h2>About Us</h2>
-            <p>Learn more about our company and values.</p>
-        </section>
-        <section id="services">
-            <h2>Our Services</h2>
-            <p>Detailed description of the services we offer.</p>
-        </section>
-        <section id="contact">
-            <h2>Contact Us</h2>
-            <p>How to get in touch with us.</p>
-        </section>
-    </main>
-    <footer>
-        <p>© 2024 Company Name. All rights reserved.</p>
-    </footer>
-</body>
+        </div>
+        <div class="hero-item">
+            <img src="../images/Bogna.jpg" alt="Bildbeschreibung" class="hero-image">
+            <div class="hero-text">
+                <h1>Bogna</h1>
+                <p>Bogna ist der Macher der dieses Projekt zusammengehalten hat.</p>
+            </div>
+        </div>
+        <div class="hero-item">
+            <img src="../images/Tom.jpg" alt="Bildbeschreibung" class="hero-image">
+            <div class="hero-text">
+                <h1>Tom</h1>
+                <p>Tom ist der Macher und ChatGPT Flüsterer.</p>
+            </div>
+        </div>
+        <div class="hero-item">
+            <img src="../images/Zvonimir.jpg" alt="Bildbeschreibung" class="hero-image">
+            <div class="hero-text">
+                <h1>Zazamir</h1>
+                <p>Zvonimier kann jetzt alles Dokumentieren.</p>
+            </div>
+        </div>
+    </section>
+    <section id="about">
+        <h2>Über uns</h2>
+        <p>Willkommen bei Gute Verkäufer GesMBH, Ihrem vertrauenswürdigen Partner für M-Bot Fernsteuerung. Unser Projekt zielt darauf ab, die Interaktion und Steuerung Ihrer M-Bots so einfach und effizient wie möglich zu gestalten. Unser Team besteht aus leidenschaftlichen Fachleuten, die sich der Verbesserung Ihrer Erfahrung verschrieben haben.</p>
+    </section>
+    <section id="services">
+        <h2>Unsere Dienstleistungen</h2>
+        <p>Wir bieten eine breite Palette von Dienstleistungen rund um die M-Bot Fernsteuerung an, einschließlich:
+        <ul>
+            <li>Benutzerfreundliche Steuerungsschnittstelle</li>
+            <li>Echtzeit-Überwachung und -Kontrolle</li>
+            <li>Langzeitdatenspeicherung und -analyse</li>
+            <li>Kundenspezifische Anpassungen und Support</li>
+        </ul>
+        </p>
+    </section>
+    <section id="contact">
+        <h2>Kontakt</h2>
+        <p>Wir freuen uns darauf, von Ihnen zu hören! Für Anfragen oder Support kontaktieren Sie uns bitte über:
+        <ul>
+            <li>E-Mail: support@guteverkaeufer.at</li>
+            <li>Telefon: +43 123 456 789</li>
+            <li>Adresse: Musterstraße 1, 1010 Wien, Österreich</li>
+        </ul>
+        </p>
+    </section>
+</main>
+<footer>
+    <p>© 2024 Gute Verkäufer GesMBH. Alle Rechte vorbehalten.</p>
+</footer>
 <script>
     function toggleLogin() {
         var loginForm = document.getElementById('login-form');
@@ -193,6 +250,15 @@
             loginForm.style.display = 'block';
         }
     }
-</script>
 
+    document.querySelectorAll('nav a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+</body>
 </html>
