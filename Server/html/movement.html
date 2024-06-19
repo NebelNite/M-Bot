@@ -367,9 +367,11 @@
             colorSelector.style.display = 'none';
 
             selectedColor = selectedColor.replace('#', '');
+
             const r = parseInt(selectedColor.slice(0, 2), 16);
             const g = parseInt(selectedColor.slice(2, 4), 16);
             const b = parseInt(selectedColor.slice(4, 6), 16);
+
             const rgb = r + ":" + g + ":" + b;
 
             const command = {
@@ -386,6 +388,7 @@
 
         function handleMouseOver(direction) {
             console.log('Mouse Over!');
+
             const command = {
                 typ: direction,
                 command: direction

@@ -233,6 +233,7 @@ function listenForUdpMessages() {
     }
 
     if (msg === 'MBotDiscovered') {
+      
       const mbotIp = remote.address;
       if (!mbotList.some(mbot => mbot.ip === mbotIp)) {
         mbotList.push({ ip: mbotIp });
