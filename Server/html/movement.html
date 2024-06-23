@@ -501,6 +501,22 @@
         document.getElementById('mbotDropdown').addEventListener('change', function () {
             selectedMbots = Array.from(this.selectedOptions).map(option => option.value);
             console.log('Selected mBots:', selectedMbots); // Debug message
+
+            // Send the selected mBots to the server
+            fetch('/setSelectedMbots', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ selected: selectedMbots }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
         });
 
         // Continually fetch the mBot list at regular intervals
@@ -510,5 +526,6 @@
         fetchMbotList();
     });
 </script>
+
 
 </html>

@@ -15,8 +15,10 @@ const { MongoClient } = require('mongodb');
 const port = 3001;
 let mbotList = [];
 let mBotPort = 12345;
+let lfPort = 12346;  // Define the line follower port
 let sensorData = {};
 const collectionName = 'sensorData';
+let lineFollowerActive = false;  // Track if line follower mode is active
 
 const app = express();
 app.use(session({
@@ -77,7 +79,6 @@ app.post('/api/sensorData', (req, res) => {
 
   sensorDataCollection.insertOne(sensorData)
       .then(result => {
-        console.log('Sensor data stored successfully:', result);
         res.status(201).send({ message: 'Sensor data stored successfully' });
       })
       .catch(error => {
@@ -129,6 +130,9 @@ app.get('/getMBotData', (req, res) => {
 });
 
 app.post('/sendMovement', (req, res) => {
+  if (lineFollowerActive) {
+    return res.status(403).send({ message: 'Line follower mode active' });
+  }
   const { command, selectedMbots } = req.body;
   console.log(`sendMovement received: command=${JSON.stringify(command)}, selectedMbots=${JSON.stringify(selectedMbots)}`);
   sendCommandToMbot(command, selectedMbots);
@@ -137,6 +141,9 @@ app.post('/sendMovement', (req, res) => {
 });
 
 app.post('/sendSpeed', (req, res) => {
+  if (lineFollowerActive) {
+    return res.status(403).send({ message: 'Line follower mode active' });
+  }
   const { command, selectedMbots } = req.body;
   console.log(`sendSpeed received: command=${JSON.stringify(command)}, selectedMbots=${JSON.stringify(selectedMbots)}`);
   sendCommandToMbot(command, selectedMbots);
@@ -144,6 +151,9 @@ app.post('/sendSpeed', (req, res) => {
 });
 
 app.post('/sendColor', (req, res) => {
+  if (lineFollowerActive) {
+    return res.status(403).send({ message: 'Line follower mode active' });
+  }
   const { command, selectedMbots } = req.body;
   console.log(`sendColor received: command=${JSON.stringify(command)}, selectedMbots=${JSON.stringify(selectedMbots)}`);
   sendCommandToMbot(command, selectedMbots);
@@ -151,6 +161,9 @@ app.post('/sendColor', (req, res) => {
 });
 
 app.post('/playSound', (req, res) => {
+  if (lineFollowerActive) {
+    return res.status(403).send({ message: 'Line follower mode active' });
+  }
   const { command, selectedMbots } = req.body;
   console.log(`playSound received: command=${JSON.stringify(command)}, selectedMbots=${JSON.stringify(selectedMbots)}`);
   sendCommandToMbot(command, selectedMbots);
@@ -160,21 +173,26 @@ app.post('/playSound', (req, res) => {
 app.post('/sendLineFollower', (req, res) => {
   const { command, selectedMbots } = req.body;
   console.log(`sendLineFollower received: command=${JSON.stringify(command)}, selectedMbots=${JSON.stringify(selectedMbots)}`);
-  sendCommandToMbot(command, selectedMbots);
+  if (command.typ === "11") {
+    lineFollowerActive = command.command === 'true';
+    sendCommandToMbot(command, selectedMbots);  // Send to main port (12345) to initialize
+  } else {
+    sendCommandToMbot(command, selectedMbots, lfPort);  // Send to line follower port (12346)
+  }
   res.end();
 });
 
-function sendCommandToMbot(command, selectedMbots) {
+function sendCommandToMbot(command, selectedMbots, port = mBotPort) {
   command = command.typ + ';' + command.command;
-  console.log(`Sending command: ${command} to mBots: ${selectedMbots}`);
+  console.log(`Sending command: ${command} to mBots: ${selectedMbots} on port ${port}`);
   selectedMbots.forEach(mbotIp => {
     const client = dgram.createSocket('udp4');
     const buffer = Buffer.from(command);
-    client.send(buffer, 0, buffer.length, mBotPort, mbotIp, (error) => {
+    client.send(buffer, 0, buffer.length, port, mbotIp, (error) => {
       if (error) {
-        console.error(`Error sending message to ${mbotIp}:${mBotPort}:`, error);
+        console.error(`Error sending message to ${mbotIp}:${port}:`, error);
       } else {
-        console.log(`Message successfully sent to ${mbotIp}:${mBotPort}: ${command}`);
+        console.log(`Message successfully sent to ${mbotIp}:${port}: ${command}`);
       }
       client.close();
     });
@@ -183,13 +201,21 @@ function sendCommandToMbot(command, selectedMbots) {
 
 function listenForUdpMessages() {
   const server = dgram.createSocket('udp4');
+  const lineFollowerServer = dgram.createSocket('udp4'); // New UDP socket for line follower
+
   server.bind(mBotPort, '0.0.0.0');
+  lineFollowerServer.bind(lfPort, '0.0.0.0'); // Bind the line follower UDP socket
+
   console.log("Listening for UDP messages");
 
   server.on('message', (message, remote) => {
     const msg = message.toString();
     console.log(`Received message: ${msg} from ${remote.address}:${remote.port}`);
-    if (msg !== 'MBotDiscovered') {
+    
+    if (msg.startsWith('RGB')) {
+      console.log(`RGB Sensor Data from ${remote.address}:${remote.port} - ${msg}`);
+      handleLineFollowerData(msg, remote.address);
+    } else if (msg !== 'MBotDiscovered') {
       const mbotIp = remote.address;
       sensorData[mbotIp] = msg;
       lastSensorDataReceivedAt = Date.now();
@@ -222,7 +248,7 @@ function listenForUdpMessages() {
         // Save the data to MongoDB
         sensorDataCollection.insertOne(sensorDataToSave)
             .then(result => {
-              console.log('Sensor data stored successfully:', result);
+              //console.log('Sensor data stored successfully:', result);
             })
             .catch(error => {
               console.error('Error storing sensor data:', error);
@@ -233,7 +259,6 @@ function listenForUdpMessages() {
     }
 
     if (msg === 'MBotDiscovered') {
-      
       const mbotIp = remote.address;
       if (!mbotList.some(mbot => mbot.ip === mbotIp)) {
         mbotList.push({ ip: mbotIp });
@@ -251,25 +276,75 @@ function listenForUdpMessages() {
     }
   });
 
+  lineFollowerServer.on('message', (message, remote) => {
+    const msg = message.toString();
+    console.log(`Received RGB message: ${msg} from ${remote.address}:${remote.port}`);
+    handleLineFollowerData(msg, remote.address);
+  });
+
   setInterval(() => {
-    const currentTime = Date.now();
-    for (const mbotIp in sensorData) {
-      if (currentTime - lastSensorDataReceivedAt > 6000 && sensorData[mbotIp] != undefined) {
-        console.log('Timeout!');
-        sensorData[mbotIp] = ':-1;';
-      }
+    if (lineFollowerActive) {
+      console.log('Line follower active, skipping network scan.');
+      return;
     }
+    const currentTime = Date.now();
+    //for (const mbotIp in sensorData) {
+      //if (currentTime - lastSensorDataReceivedAt > 6000 && sensorData[mbotIp] != undefined) {
+        //console.log('Timeout!');
+        //sensorData[mbotIp] = ':-1;';
+      //}
+    //}
   }, 6000);
 
   return () => {
     server.close();
+    lineFollowerServer.close(); // Close the line follower UDP socket
   };
+}
+
+function handleLineFollowerData(data, mbotIp) {
+  // Process the RGB sensor data and determine the command to send
+  const sensors = data.split(';');
+  const sensorValues = {};
+
+  sensors.forEach(sensor => {
+    const [key, value] = sensor.split(':');
+    if (key && value) {
+      sensorValues[key.trim().toLowerCase()] = parseInt(value);
+    }
+  });
+
+  const { l2, l1, r1, r2 } = sensorValues;
+  let command;
+
+  // Determine the command based on the sensor values
+  if (l1 < 50 && r1 < 50) {
+    command = 'FORWARD';
+  } else if (l2 < 50 && l1 < 50) {
+    command = 'HARD_LEFT';
+  } else if (r1 < 50 && r2 < 50) {
+    command = 'HARD_RIGHT';
+  } else if (l1 < 50) {
+    command = 'SLIGHT_LEFT';
+  } else if (r1 < 50) {
+    command = 'SLIGHT_RIGHT';
+  } else if (l2 < 50) {
+    command = 'LEFT';
+  } else if (r2 < 50) {
+    command = 'RIGHT';
+  } else {
+    command = 'STOP';
+  }
+
+  console.log(`Determined command: ${command} based on sensor values: ${JSON.stringify(sensorValues)}`);
+
+  sendCommandToMbot({ typ: '12', command }, [mbotIp], lfPort);  // Send command to line follower port
 }
 
 function requireLogin(req, res, next) {
   if (req.session && req.session.loggedIn) {
     console.log('User logged in. Starting initial network scan.');
-    scanNetwork(['10.10.1']); // Initial scan on login
+    scanNetwork(['192.168.0']); // Initial scan on login
     startPeriodicScan();
     listenForUdpMessages();
     return next();
@@ -279,6 +354,10 @@ function requireLogin(req, res, next) {
 }
 
 function scanNetwork(subnets) {
+  if (lineFollowerActive) {
+    console.log('Line follower active, skipping network scan.');
+    return;
+  }
   const promises = [];
   subnets.forEach(subnet => {
     for (let i = 1; i <= 255; i++) {
@@ -291,7 +370,6 @@ function scanNetwork(subnets) {
   Promise.all(promises)
       .then(results => {
         const reachableDevices = results.filter(result => result.alive).map(result => result.host);
-        console.log('Reachable devices in the network:', reachableDevices);
         sendMessageToDevices(reachableDevices, "MBotDiscovery");
       })
       .catch(error => {
@@ -352,7 +430,7 @@ function checkPassword(req, res, next) {
 app.post('/login', checkPassword);
 
 function startPeriodicScan() {
-  const subnetsToScan = ['10.10.1'];
+  const subnetsToScan = ['192.168.0'];
   setInterval(() => {
     console.log('Periodic network scan started.');
     scanNetwork(subnetsToScan);
