@@ -430,11 +430,13 @@ function checkPassword(req, res, next) {
 app.post('/login', checkPassword);
 
 function startPeriodicScan() {
+  if(!lineFollowerActive){
   const subnetsToScan = ['192.168.0'];
   setInterval(() => {
     console.log('Periodic network scan started.');
     scanNetwork(subnetsToScan);
-  }, 60000); // Adjust the interval as needed (e.g., every 60 seconds)
+  }, 60000);// Adjust the interval as needed (e.g., every 60 seconds)
+ } 
 }
 
 server.listen(port, () => {
