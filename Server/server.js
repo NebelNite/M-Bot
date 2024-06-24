@@ -174,7 +174,7 @@ app.post('/sendLineFollower', (req, res) => {
   const { command, selectedMbots } = req.body;
   console.log(`sendLineFollower received: command=${JSON.stringify(command)}, selectedMbots=${JSON.stringify(selectedMbots)}`);
   if (command.typ === "11") {
-    lineFollowerActive = command.command === 'true';
+    lineFollowerActive=!lineFollowerActive
     sendCommandToMbot(command, selectedMbots);  // Send to main port (12345) to initialize
   } else {
     sendCommandToMbot(command, selectedMbots, lfPort);  // Send to line follower port (12346)
